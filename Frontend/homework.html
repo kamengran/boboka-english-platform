@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>作业 | BoBoKa English</title>
+
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="app.css">
+    <script src="shared.js"></script>
+    <script src="homework-ui.js"></script>
+</head>
+
+<body>
+
+<div id="site-header"></div>
+
+<main class="app-page">
+
+    <section class="app-hero">
+        <div class="app-hero-inner">
+            <span class="app-eyebrow">Homework</span>
+            <h1 id="heroTitle">我的作业</h1>
+            <p id="heroText">查看作业要求、提交作业，并根据老师的反馈修改后重新提交。</p>
+        </div>
+    </section>
+
+    <div class="app-wrap">
+
+        <div id="loadingArea" class="app-card app-message"><h2>正在读取作业...</h2></div>
+
+        <div id="errorArea" class="app-card app-message" style="display:none;">
+            <h2>暂时无法读取作业</h2>
+            <p id="errorText"></p>
+        </div>
+
+        <!-- ================= 作业列表 ================= -->
+        <div id="listView" style="display:none;">
+
+            <div id="teacherNotice" class="notice" style="display:none;margin-bottom:14px;">
+                你是老师 / 管理员账号。请到
+                <a href="teacher-homework.html" style="color:var(--blue);font-weight:800;">批改作业</a>
+                管理作业和批改学生提交。
+            </div>
+
+            <div id="filters" class="hw-filters"></div>
+
+            <div id="listBody"></div>
+
+        </div>
+
+        <!-- ================= 作业详情 ================= -->
+        <div id="detailView" style="display:none;">
+
+            <div class="lesson-bar">
+                <div class="lesson-bar-title">
+                    <span id="dCourse"></span>
+                    <h2 id="dTitle"></h2>
+                </div>
+                <div class="app-actions" style="margin:0;">
+                    <a id="dLessonLink" href="courses.html" class="app-back">← 返回 Lesson</a>
+                    <a href="homework.html" class="app-back">全部作业</a>
+                </div>
+            </div>
+
+            <div class="app-card">
+
+                <div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;">
+                    <span id="dStatus"></span>
+                    <span id="dRequired"></span>
+                    <span id="dDemo"></span>
+                </div>
+
+                <div id="dDemoNote" class="notice" style="display:none;margin-top:12px;">
+                    这是 Demo / Test Homework：系统测试用的作业，不是教材里的正式作业。
+                </div>
+
+                <dl class="hw-grid">
+                    <div><dt>相关 Lesson</dt><dd id="dLesson"></dd></div>
+                    <div><dt>截止日期</dt><dd id="dDue"></dd></div>
+                    <div><dt>可以提交</dt><dd id="dTypes"></dd></div>
+                    <div><dt>重新提交</dt><dd id="dResubmit"></dd></div>
+                    <div><dt>老师批改</dt><dd id="dTeacher"></dd></div>
+                    <div><dt>AI 检查</dt><dd id="dAi"></dd></div>
+                </dl>
+
+                <h3 style="margin-bottom:8px;">作业要求</h3>
+
+                <div id="dInstructions" class="hw-instructions"></div>
+
+            </div>
+
+            <!-- 提交 -->
+            <div class="app-card hw-form" id="submitCard">
+
+                <h2 id="submitTitle">提交作业</h2>
+
+                <p id="cannotSubmit" class="hw-error" style="display:none;"></p>
+
+                <form id="submitForm" style="display:none;">
+
+                    <div id="textBlock">
+                        <label class="hw-label" for="textInput">文字内容</label>
+                        <textarea id="textInput" placeholder="在这里输入你的作业..."></textarea>
+                        <div class="hw-hint"><span id="charCount">0</span> / <span id="charMax">20000</span> 字符</div>
+                    </div>
+
+                    <div id="fileBlock">
+                        <label class="hw-label" for="fileInput">上传文件</label>
+                        <input id="fileInput" type="file" multiple>
+                        <div class="hw-hint" id="fileHint"></div>
+                        <ul id="selectedFiles" class="hw-selected"></ul>
+                    </div>
+
+                    <div id="formMessage"></div>
+
+                    <div class="app-actions">
+                        <button id="submitButton" type="submit" class="app-btn">提交作业</button>
+                    </div>
+
+                </form>
+
+            </div>
+
+            <!-- 历史 -->
+            <div class="app-card">
+
+                <h2>提交记录 · 版本历史</h2>
+
+                <p class="app-muted" style="margin:4px 0 12px;">
+                    每次提交都会保留为一个新版本，重新提交不会覆盖旧版本。反馈对应具体的版本。
+                </p>
+
+                <div id="history"></div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</main>
+
+<div id="site-footer"></div>
+
+<script>
+
+const $ = id => document.getElementById(id);
+
+const params = BoBoKa.query();
+
+const assignmentId = Number(params.get("id") || 0);
+
+let detail = null;
+
+let files = [];   // 选中的文件（File 对象）
+
+
+// =========================================================
+// 列表
+// =========================================================
+
+const FILTERS = [
+    ["all", "全部", () => true],
+    ["todo", "待完成", i => i.status === "NOT_STARTED"],
+    ["revise", "需要修改", i => i.status === "NEEDS_REVISION"],
+    ["waiting", "等待批改", i => ["SUBMITTED", "RESUBMITTED", "AI_REVIEWING", "AI_REVIEWED", "TEACHER_REVIEW"].includes(i.status)],
+    ["done", "已完成", i => i.status === "COMPLETED"]
+];
+
+let allItems = [];
+let filterKey = "all";
+
+
+function renderList() {
+
+    const match = FILTERS.find(f => f[0] === filterKey)[2];
+
+    const items = allItems.filter(match);
+
+    $("filters").innerHTML = FILTERS.map(([key, label, fn]) => `
+        <button type="button" class="chip ${key === filterKey ? "active" : ""}" data-key="${key}">
+            ${label} ${allItems.filter(fn).length}
+        </button>`).join("");
+
+    if (items.length === 0) {
+
+        $("listBody").innerHTML = `
+            <div class="app-card app-message">
+                <p>${allItems.length === 0
+                    ? "现在还没有作业。老师布置作业后，会显示在这里，也会显示在对应 Lesson 页面里。"
+                    : "这个分类下没有作业。"}</p>
+            </div>`;
+
+        return;
+    }
+
+    // 按课程 / Lesson 分组
+    const groups = {};
+
+    items.forEach(item => {
+        const key = `${item.course_title} · Lesson ${item.lesson_number} ${item.lesson_title}`;
+        (groups[key] = groups[key] || []).push(item);
+    });
+
+    $("listBody").innerHTML = Object.entries(groups).map(([name, list]) => `
+        <div class="hw-group">
+            <h3>${BoBoKa.esc(name)}</h3>
+            ${list.map(item => `
+                <a class="hw-card" href="homework.html?id=${item.id}">
+                    <div class="hw-card-main">
+                        <div class="hw-card-title">${BoBoKa.esc(item.title)}</div>
+                        <div class="hw-card-meta">
+                            ${HW.requiredBadge(item.is_required)}
+                            ${HW.demoBadge(item.is_demo)}
+                            <span>截止：${HW.dueHTML(item, item.overdue)}</span>
+                            ${item.version ? `<span>已提交 Version ${item.version}</span>` : ""}
+                        </div>
+                    </div>
+                    ${HW.statusPill(item.status)}
+                </a>`).join("")}
+        </div>`).join("");
+}
+
+
+$("filters").addEventListener("click", event => {
+
+    const button = event.target.closest("button[data-key]");
+
+    if (!button) return;
+
+    filterKey = button.dataset.key;
+
+    renderList();
+});
+
+
+// =========================================================
+// 详情
+// =========================================================
+
+function renderDetail() {
+
+    const a = detail.assignment;
+
+    document.title = a.title + " | BoBoKa English";
+
+    $("heroTitle").textContent = "作业";
+    $("heroText").textContent = "查看作业要求，提交作业，并根据老师的反馈修改后重新提交。";
+
+    $("dCourse").textContent = a.course_title;
+    $("dTitle").textContent = a.title;
+
+    $("dLessonLink").href = BoBoKa.lessonUrl("lesson.html", a.course_code, a.lesson_number);
+
+    $("dStatus").innerHTML = HW.statusPill(detail.status);
+    $("dRequired").innerHTML = HW.requiredBadge(a.is_required);
+    $("dDemo").innerHTML = HW.demoBadge(a.is_demo);
+    $("dDemoNote").style.display = a.is_demo ? "block" : "none";
+
+    $("dLesson").textContent = `Lesson ${a.lesson_number} · ${a.lesson_title}`;
+    $("dDue").innerHTML = HW.dueHTML(a, detail.overdue);
+    $("dTypes").textContent = a.allowed_types.map(t => HW.TYPE_LABEL[t] || t).join("、");
+
+    $("dResubmit").textContent = a.allow_resubmit
+        ? "允许（提交后可以再提交新版本）"
+        : "不允许（除非老师退回修改）";
+
+    $("dTeacher").textContent = a.teacher_review_required
+        ? "需要老师批改"
+        : "不需要老师批改（提交后直接算完成）";
+
+    $("dAi").textContent = a.ai_review_enabled
+        ? `已开启设置（Level ${a.ai_feedback_level}）· 但 AI 功能尚未接入`
+        : "未开启";
+
+    $("dInstructions").textContent = a.instructions || "（老师没有写详细说明）";
+
+    // ---- 提交表单
+    const allowsText = a.allowed_types.includes("text");
+
+    const fileTypes = a.allowed_types.filter(t => t !== "text");
+
+    const form = $("submitForm");
+
+    if (!detail.can_submit) {
+
+        form.style.display = "none";
+
+        $("cannotSubmit").textContent = detail.cannot_submit_reason || "现在不能提交。";
+        $("cannotSubmit").style.display = "block";
+
+        $("submitTitle").textContent = "提交作业";
+
+    }
+
+    else {
+
+        $("cannotSubmit").style.display = "none";
+
+        form.style.display = "block";
+
+        const resubmit = detail.versions.length > 0;
+
+        $("submitTitle").textContent =
+            resubmit ? `重新提交（将保存为 Version ${detail.next_version}）` : "提交作业（Version 1）";
+
+        $("submitButton").textContent =
+            resubmit ? `提交 Version ${detail.next_version}` : "提交作业";
+
+        // 上一次提交完成后要恢复按钮，才能提交下一个版本
+        $("submitButton").disabled = false;
+
+        $("textBlock").style.display = allowsText ? "block" : "none";
+        $("fileBlock").style.display = fileTypes.length ? "block" : "none";
+
+        $("charMax").textContent = detail.limits.max_text_chars;
+
+        $("fileHint").textContent =
+            `可以上传：${fileTypes.map(t => HW.TYPE_LABEL[t]).join("、")}。` +
+            `最多 ${detail.limits.max_files} 个文件，每个不超过 ${detail.limits.max_file_mb} MB。`;
+
+        const accept = [];
+
+        if (fileTypes.includes("image")) accept.push("image/*", ".heic");
+        if (fileTypes.includes("pdf")) accept.push(".pdf");
+        if (fileTypes.includes("document")) accept.push(".doc", ".docx");
+        if (fileTypes.includes("audio")) accept.push("audio/*", ".mp3", ".m4a", ".wav", ".ogg", ".aac");
+
+        $("fileInput").setAttribute("accept", accept.join(","));
+
+        if (resubmit) {
+            $("formMessage").innerHTML =
+                '<p class="hw-hint" style="margin-top:12px;">重新提交需要重新填写文字、重新选择文件；之前的版本仍会保留。</p>';
+        }
+    }
+
+    // ---- 历史（最新的在最上面）
+    const latest = detail.versions.length;
+
+    $("history").innerHTML = detail.versions.length === 0
+        ? '<p class="app-muted">你还没有提交这份作业。</p>'
+        : detail.versions.slice().reverse().map(v =>
+            HW.versionHTML(v, { latest: v.version === latest, aiEnabled: a.ai_review_enabled })
+        ).join("");
+}
+
+
+function renderSelected() {
+
+    $("selectedFiles").innerHTML = files.map((file, index) => `
+        <li>
+            <span>${BoBoKa.esc(file.name)} · ${HW.formatBytes(file.size)}</span>
+            <button type="button" data-index="${index}" aria-label="移除">✕</button>
+        </li>`).join("");
+}
+
+
+$("fileInput").addEventListener("change", event => {
+
+    const max = detail.limits.max_files;
+
+    const maxBytes = detail.limits.max_file_mb * 1024 * 1024;
+
+    for (const file of Array.from(event.target.files)) {
+
+        if (files.length >= max) {
+            showError(`最多 ${max} 个文件。`);
+            break;
+        }
+
+        if (file.size > maxBytes) {
+            showError(`“${file.name}” 太大（最大 ${detail.limits.max_file_mb} MB）。`);
+            continue;
+        }
+
+        files.push(file);
+    }
+
+    event.target.value = "";
+
+    renderSelected();
+});
+
+
+$("selectedFiles").addEventListener("click", event => {
+
+    const button = event.target.closest("button[data-index]");
+
+    if (!button) return;
+
+    files.splice(Number(button.dataset.index), 1);
+
+    renderSelected();
+});
+
+
+$("textInput").addEventListener("input", () => {
+    $("charCount").textContent = $("textInput").value.length;
+});
+
+
+function showError(message) {
+    $("formMessage").innerHTML = `<div class="hw-error">${BoBoKa.esc(message)}</div>`;
+}
+
+
+$("submitForm").addEventListener("submit", async event => {
+
+    event.preventDefault();
+
+    const a = detail.assignment;
+
+    const text = $("textInput").value.trim();
+
+    if (!text && files.length === 0) {
+        showError(a.allowed_types.includes("text") ? "请输入文字，或者上传文件。" : "请上传文件。");
+        return;
+    }
+
+    const version = detail.next_version;
+
+    if (
+        detail.versions.length > 0 &&
+        !confirm(`确定提交 Version ${version} 吗？之前的版本会保留。`)
+    ) {
+        return;
+    }
+
+    const form = new FormData();
+
+    if (text) form.append("text", text);
+
+    files.forEach(file => form.append("files", file, file.name));
+
+    $("submitButton").disabled = true;
+    $("submitButton").textContent = "正在提交...";
+    $("formMessage").innerHTML = "";
+
+    try {
+
+        await BoBoKa.post(`/api/homework/${assignmentId}/submissions`, form);
+
+        files = [];
+
+        $("textInput").value = "";
+
+        await load(`✓ 已提交 Version ${version}。`);
+
+        window.scrollTo({ top: document.getElementById("history").offsetTop - 80, behavior: "smooth" });
+
+    }
+
+    catch (error) {
+
+        showError(error.message);
+
+        $("submitButton").disabled = false;
+        $("submitButton").textContent = detail.versions.length ? `提交 Version ${detail.next_version}` : "提交作业";
+    }
+});
+
+
+// =========================================================
+// 读取
+// =========================================================
+
+async function load(successMessage) {
+
+    try {
+
+        const me = await BoBoKa.requireLogin();
+
+        if (!assignmentId) {
+
+            allItems = (await BoBoKa.api("/api/homework")).data;
+
+            $("teacherNotice").style.display =
+                me.user.role === "student" ? "none" : "block";
+
+            $("loadingArea").style.display = "none";
+            $("listView").style.display = "block";
+            $("detailView").style.display = "none";
+
+            renderList();
+
+            return;
+        }
+
+        detail = (await BoBoKa.api(`/api/homework/${assignmentId}`)).data;
+
+        $("loadingArea").style.display = "none";
+        $("listView").style.display = "none";
+        $("detailView").style.display = "block";
+
+        renderDetail();
+
+        if (successMessage) {
+            $("submitCard").insertAdjacentHTML(
+                "afterbegin",
+                `<div class="hw-ok" style="margin:0 0 12px;">${BoBoKa.esc(successMessage)} 老师批改后，反馈会显示在下面的版本里。</div>`
+            );
+        }
+
+    }
+
+    catch (error) {
+
+        $("loadingArea").style.display = "none";
+        $("errorArea").style.display = "block";
+        $("errorText").textContent = error.message;
+    }
+}
+
+load();
+
+</script>
+
+</body>
+</html>

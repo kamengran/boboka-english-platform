@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>阅读教材 | BoBoKa English</title>
+
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="app.css">
+    <script src="shared.js"></script>
+</head>
+
+<body>
+
+<div id="site-header"></div>
+
+<main class="app-page">
+
+    <div class="app-wrap" style="width:min(calc(100% - 32px), 1200px);padding-top:20px;">
+
+        <div class="lesson-bar">
+
+            <div class="lesson-bar-title">
+                <span>电子教材</span>
+                <h2 id="bookTitle">BoBoKa English Book</h2>
+            </div>
+
+            <div class="app-actions" style="margin:0;">
+                <a href="books.html" class="app-back">← 全部教材</a>
+                <a id="courseLink" href="courses.html" class="app-back" style="display:none;"></a>
+                <a id="openLink" href="#" target="_blank" rel="noopener" class="app-back">在新窗口打开 PDF</a>
+            </div>
+
+        </div>
+
+        <div id="errorArea" class="app-card app-message" style="display:none;">
+            <h2>找不到这本教材</h2>
+            <p><a href="books.html" style="color:var(--blue);font-weight:800;">返回教材列表</a></p>
+        </div>
+
+        <iframe id="frame" class="reader-frame" title="教材 PDF" style="display:none;"></iframe>
+
+    </div>
+
+</main>
+
+<div id="site-footer"></div>
+
+<script>
+
+const number = Number(BoBoKa.query().get("book"));
+
+const $ = id => document.getElementById(id);
+
+
+async function start() {
+
+    try {
+
+        await BoBoKa.requireLogin();
+
+        const books = (await BoBoKa.api("/api/books")).data;
+
+        const book = books.find(b => b.number === number);
+
+        if (!book) throw new Error("not found");
+
+        document.title = book.title + " | BoBoKa English";
+
+        $("bookTitle").textContent = book.title;
+
+        if (!book.accessible) {
+
+            $("errorArea").querySelector("h2").textContent = "你没有这本教材的权限";
+
+            $("errorArea").style.display = "block";
+
+            return;
+        }
+
+        // PDF 通过需要登录和课程权限的接口读取
+        $("frame").src = book.url;
+        $("frame").style.display = "block";
+
+        $("openLink").href = book.url;
+
+        // Book N 对应的互动课程（课程存在并且我有权限时才显示）
+        try {
+
+            const course = (await BoBoKa.api(
+                "/api/courses/" + encodeURIComponent(book.course_code), { noRedirect: true }
+            )).data;
+
+            if (course.has_access) {
+
+                $("courseLink").href = "course-detail.html?course=" + encodeURIComponent(course.course_code);
+                $("courseLink").textContent = "打开互动课程：" + course.title;
+                $("courseLink").style.display = "inline-flex";
+            }
+
+        }
+
+        catch (error) {
+            // 这本教材还没有对应的互动课程：不显示入口
+        }
+
+    }
+
+    catch (error) {
+
+        $("errorArea").style.display = "block";
+    }
+}
+
+start();
+
+</script>
+
+</body>
+</html>

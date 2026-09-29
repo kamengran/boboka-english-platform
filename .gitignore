@@ -1,0 +1,66 @@
+# Dependencies
+node_modules/
+
+# Secrets / environment
+.env
+.env.*
+!.env.example
+
+# Logs and temp files
+*.log
+npm-debug.log*
+*.tmp
+*.temp
+*.bak
+~$*
+
+# SQLite runtime side files (the .db itself is tracked as course content)
+*.db-journal
+*.db-wal
+*.db-shm
+
+# OS / editor
+.DS_Store
+Thumbs.db
+desktop.ini
+.vscode/
+.idea/
+
+# 数据库包含学生的账户和学习数据，不放进 Git。
+# 教材内容由 Backed/data.js 生成：cd Backed && npm run content
+Backed/boboka.db
+Backed/boboka.db-*
+
+# 学生上传的作业文件（不进 Git）
+Backed/uploads/
+# Private backend
+Backed/
+Backend/
+
+# Dependencies
+node_modules/
+
+# Secrets / environment
+.env
+.env.*
+!.env.example
+
+# Logs and temp files
+*.log
+npm-debug.log*
+*.tmp
+*.temp
+*.bak
+~$*
+
+# SQLite runtime side files
+*.db-journal
+*.db-wal
+*.db-shm
+
+# OS / editor
+.DS_Store
+Thumbs.db
+desktop.ini
+.vscode/
+.idea/

@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>学习进度 | BoBoKa English</title>
+
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="app.css">
+    <script src="shared.js"></script>
+</head>
+
+<body>
+
+<div id="site-header"></div>
+
+<main class="app-page">
+
+    <section class="app-hero">
+        <div class="app-hero-inner">
+            <span class="app-eyebrow">My Progress</span>
+            <h1>我的学习进度</h1>
+            <p>这里显示你的账户里保存的真实学习记录：打字、测验、口语和单词卡。</p>
+        </div>
+    </section>
+
+    <div class="app-wrap">
+
+        <div id="ckLine" class="notice" style="margin-bottom:18px;background:#eef6ff;color:#1c4f8a;"></div>
+
+        <div id="loadingArea" class="app-card app-message"><h2>正在读取...</h2></div>
+
+        <div id="errorArea" class="app-card app-message" style="display:none;">
+            <h2>暂时无法读取课程信息</h2>
+            <p id="errorText"></p>
+        </div>
+
+        <div id="content" style="display:none;">
+
+            <div class="stat-row">
+                <div class="stat-box"><strong id="sVisited">0</strong><span>学习过的课</span></div>
+                <div class="stat-box"><strong id="sDone">0</strong><span>完成练习的课</span></div>
+                <div class="stat-box"><strong id="sTyping">0</strong><span>打字完成次数</span></div>
+                <div class="stat-box"><strong id="sQuiz">0</strong><span>测验次数</span></div>
+            </div>
+
+            <div class="stat-row">
+                <div class="stat-box"><strong id="sHwDone">0 / 0</strong><span>必做作业完成</span></div>
+                <div class="stat-box"><strong id="sHwSub">0</strong><span>已提交的作业</span></div>
+                <div class="stat-box"><strong id="sHwRev">0</strong><span>需要修改</span></div>
+                <div class="stat-box"><strong id="sHwLink" style="font-size:16px;"><a href="homework.html" style="color:var(--blue);">查看作业 →</a></strong><span>&nbsp;</span></div>
+            </div>
+
+            <div class="app-card">
+                <h2>课程进度</h2>
+                <p class="app-muted" style="margin:4px 0 14px;">
+                    一课完成打字练习并做过一次测验，并且这一课所有必做（Required）作业都被老师标记为完成，才算“完成练习”。
+                </p>
+                <div id="courseProgress"></div>
+            </div>
+
+            <div class="app-card">
+                <h2>每一课的记录</h2>
+                <div id="lessonTable"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</main>
+
+<div id="site-footer"></div>
+
+<script>
+
+const $ = id => document.getElementById(id);
+
+const STEP_LABEL = { lesson: "浏览课程", typing: "打字", quiz: "测验", flashcards: "单词卡", speaking: "口语" };
+
+
+async function render() {
+
+    try {
+
+        const { data } = await BoBoKa.api("/api/progress");
+
+        const t = data.totals;
+
+        $("sVisited").textContent = t.lessons_started;
+        $("sDone").textContent = t.lessons_completed;
+        $("sTyping").textContent = t.typing_completed;
+        $("sQuiz").textContent = t.quiz_attempts;
+
+        $("sHwDone").textContent = t.homework_required_completed + " / " + t.homework_required_total;
+        $("sHwSub").textContent = t.homework_submitted;
+        $("sHwRev").textContent = t.homework_needs_revision;
+
+        const c = data.checkin;
+
+        $("ckLine").innerHTML =
+            `🔥 连续学习 <b>${c.current_streak}</b> 天 · 累计打卡 <b>${c.total_checkins}</b> 天 · ` +
+            (c.checked_in_today
+                ? "✓ 今天已打卡"
+                : '今天还没打卡（<a href="account.html" style="color:var(--blue);font-weight:800;">去打卡</a>）');
+
+        // 课程进度
+        $("courseProgress").innerHTML = data.courses.length
+            ? data.courses.map(course => `
+                <div style="margin-bottom:16px;">
+                    <div class="bar-label">
+                        <span><a href="course-detail.html?course=${encodeURIComponent(course.course_code)}"><b>${BoBoKa.esc(course.title)}</b></a></span>
+                        <span>已完成 ${course.completed} / ${course.lesson_count} 课 · ${course.percent}%</span>
+                    </div>
+                    <div class="bar"><i style="width:${course.percent}%"></i></div>
+                    <div class="app-muted" style="margin-top:4px;">
+                        学习中 ${course.in_progress} 课 · 已录入教材内容的课：${course.lessons_with_content} / ${course.lesson_count}
+                    </div>
+                </div>`).join("")
+            : '<p class="app-muted">这个账号还没有开通课程。</p>';
+
+        // 每课记录
+        if (data.lessons.length === 0) {
+
+            $("lessonTable").innerHTML = `
+                <div class="app-message">
+                    <p>还没有学习记录。去 <a href="courses.html" style="color:var(--blue);font-weight:800;">课程</a>
+                    学习一课，完成打字或测验后，这里就会出现记录。</p>
+                </div>`;
+        }
+
+        else {
+
+            $("lessonTable").innerHTML = `
+                <table class="progress-table">
+                    <thead>
+                        <tr>
+                            <th>课程</th><th>打字</th><th>测验</th><th>口语</th><th>单词卡</th><th>作业</th><th>状态</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${data.lessons.map(l => `
+                            <tr>
+                                <td>
+                                    <a href="${BoBoKa.lessonUrl("lesson.html", l.course_code, l.lesson_number)}">
+                                        <b>Lesson ${l.lesson_number}</b> ${BoBoKa.esc(l.title)}
+                                    </a>
+                                </td>
+                                <td>${l.typing.count ? `${l.typing.best_accuracy}% · ${Math.round(l.typing.best_wpm)} WPM` : "—"}</td>
+                                <td>${l.quiz.attempts ? `最高 ${l.quiz.best_score}%（${l.quiz.attempts} 次）` : "—"}</td>
+                                <td>${l.speaking.practiced ? `${l.speaking.practiced} / ${l.speaking.total} 项` : "—"}</td>
+                                <td>${l.flashcards.known + l.flashcards.practice ? `认识 ${l.flashcards.known}/${l.flashcards.total}` : "—"}</td>
+                                <td>${l.homework.total ? (l.homework.required_total ? `必做 ${l.homework.required_completed}/${l.homework.required_total}` : `选做 ${l.homework.submitted_total}/${l.homework.total}`) : "—"}</td>
+                                <td><span class="tag ${l.status === "completed" ? "done" : "todo"}">${l.status === "completed" ? "完成练习" : "学习中 " + l.progress_percent + "%"}</span></td>
+                            </tr>`).join("")}
+                    </tbody>
+                </table>`;
+        }
+
+        $("loadingArea").style.display = "none";
+        $("content").style.display = "block";
+
+    }
+
+    catch (error) {
+
+        $("loadingArea").style.display = "none";
+        $("errorArea").style.display = "block";
+        $("errorText").textContent = error.message;
+    }
+}
+
+render();
+
+</script>
+
+</body>
+</html>

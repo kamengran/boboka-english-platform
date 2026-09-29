@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>练习中心 | BoBoKa English</title>
+
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="app.css">
+    <script src="shared.js"></script>
+</head>
+
+<body>
+
+<div id="site-header"></div>
+
+<main class="app-page">
+
+    <section class="app-hero">
+        <div class="app-hero-inner">
+            <span class="app-eyebrow">Practice Center</span>
+            <h1>练习中心</h1>
+            <p>所有练习都基于你正在学习的 Lesson：单词卡、打字、测验和口语。</p>
+        </div>
+    </section>
+
+    <div class="app-wrap">
+
+        <div id="pickerArea"></div>
+
+        <div id="toolsArea" style="display:none;">
+
+            <div class="lesson-bar">
+                <div class="lesson-bar-title">
+                    <span id="courseLabel"></span>
+                    <h2 id="lessonTitle"></h2>
+                    <p id="lessonChinese"></p>
+                </div>
+                <div class="app-actions" style="margin:0;">
+                    <a id="backLesson" href="courses.html" class="app-back">← 返回本课</a>
+                    <a href="practice.html" class="app-back">换一课</a>
+                </div>
+            </div>
+
+            <div id="pendingNote" class="notice" style="display:none;margin-bottom:16px;"></div>
+
+            <div class="tool-grid">
+
+                <a id="toolFlash" class="tool-card" href="flashcards.html">
+                    <div class="tool-icon">🃏</div>
+                    <h3>单词卡</h3>
+                    <p>用本课单词翻卡片，标记“认识”或“需要练习”。</p>
+                    <div id="stateFlash" class="tool-state"></div>
+                </a>
+
+                <a id="toolTyping" class="tool-card" href="typing-practice.html">
+                    <div class="tool-icon">⌨️</div>
+                    <h3>打字练习</h3>
+                    <p>输入本课对话和核心句型的例句，练习拼写、准确率和速度。</p>
+                    <div id="stateTyping" class="tool-state"></div>
+                </a>
+
+                <a id="toolQuiz" class="tool-card" href="quiz.html">
+                    <div class="tool-icon">🧪</div>
+                    <h3>本课测验</h3>
+                    <p>单词、对话理解和核心句型选择题，完成后查看得分和解析。</p>
+                    <div id="stateQuiz" class="tool-state"></div>
+                </a>
+
+                <a id="toolSpeaking" class="tool-card" href="speaking.html">
+                    <div class="tool-icon">🎤</div>
+                    <h3>口语练习</h3>
+                    <p>跟读、回答问题、用句型说话，并录音回听。</p>
+                    <div id="stateSpeaking" class="tool-state"></div>
+                </a>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</main>
+
+<div id="site-footer"></div>
+
+<script>
+
+const params = BoBoKa.query();
+
+const courseCode = params.get("course") || "speaking1";
+
+const hasLesson = params.has("lesson");
+
+const lessonNumber = Number(params.get("lesson") || 0);
+
+const $ = id => document.getElementById(id);
+
+
+async function start() {
+
+    if (!hasLesson) {
+
+        BoBoKa.lessonPicker($("pickerArea"), "practice.html", "选择一课，开始练习");
+
+        return;
+    }
+
+    try {
+
+        const result = await BoBoKa.api(
+            `/api/courses/${encodeURIComponent(courseCode)}/lessons/${lessonNumber}`
+        );
+
+        const data = result.data;
+        const lesson = data.lesson;
+
+        $("pickerArea").style.display = "none";
+        $("toolsArea").style.display = "block";
+
+        $("courseLabel").textContent = lesson.course_title;
+        $("lessonTitle").textContent = `Lesson ${lesson.lesson_number} · ${lesson.title}`;
+        $("lessonChinese").textContent = lesson.chinese_title || "";
+
+        $("backLesson").href = BoBoKa.lessonUrl("lesson.html", courseCode, lessonNumber);
+
+        const targets = {
+            toolFlash: "flashcards.html",
+            toolTyping: "typing-practice.html",
+            toolQuiz: "quiz.html",
+            toolSpeaking: "speaking.html"
+        };
+
+        for (const id in targets) {
+            $(id).href = BoBoKa.lessonUrl(targets[id], courseCode, lessonNumber);
+        }
+
+        if (lesson.content_status === "empty") {
+
+            $("pendingNote").textContent =
+                "本课教材内容待补充，暂时还不能练习。";
+
+            $("pendingNote").style.display = "block";
+
+            for (const id in targets) {
+                $(id).removeAttribute("href");
+                $(id).style.opacity = "0.5";
+            }
+
+            return;
+        }
+
+        if (lesson.content_status === "partial") {
+
+            $("pendingNote").textContent =
+                "本课教材内容还有部分待补充，练习只使用已经录入的内容。";
+
+            $("pendingNote").style.display = "block";
+        }
+
+        // 我在这一课的学习记录（来自服务器）
+        const stats = data.my_progress.stats;
+
+        if (stats.flashcards.known + stats.flashcards.practice > 0) {
+            $("stateFlash").textContent =
+                `认识 ${stats.flashcards.known} / ${stats.flashcards.total}`;
+        }
+
+        if (stats.typing.count > 0) {
+            $("stateTyping").textContent =
+                `✓ 已完成 ${stats.typing.count} 次 · 最高准确率 ${stats.typing.best_accuracy}%`;
+        }
+
+        if (stats.quiz.attempts > 0) {
+            $("stateQuiz").textContent =
+                `✓ 已测验 ${stats.quiz.attempts} 次 · 最高分 ${stats.quiz.best_score}%`;
+        }
+
+        if (stats.speaking.practiced > 0) {
+            $("stateSpeaking").textContent =
+                `已练习 ${stats.speaking.practiced} / ${stats.speaking.total} 项`;
+        }
+
+        if (data.my_progress.status === "completed") {
+            $("pendingNote").textContent = "✓ 这一课的练习已经完成（打字 + 测验）。你可以继续复习。";
+            $("pendingNote").style.display = "block";
+        }
+
+    }
+
+    catch (error) {
+
+        $("pickerArea").innerHTML = `
+            <div class="app-card app-message">
+                <h2>暂时无法读取课程</h2>
+                <p>${BoBoKa.esc(error.message)}</p>
+            </div>
+        `;
+    }
+}
+
+start();
+
+</script>
+
+</body>
+</html>

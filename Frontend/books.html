@@ -1,0 +1,825 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>书籍 | BoBoKa English</title>
+
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="app.css">
+
+    <style>
+        /* =========================================
+           BOOKS PAGE
+        ========================================= */
+
+        .books-page {
+            min-height: 750px;
+            background: #f6f9fd;
+        }
+
+        .books-hero {
+            padding: 55px 20px 35px;
+            text-align: center;
+            background:
+                linear-gradient(
+                    135deg,
+                    #f5faff 0%,
+                    #ffffff 55%,
+                    #fff7fb 100%
+                );
+        }
+
+        .books-hero-inner {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .books-eyebrow {
+            display: inline-block;
+            margin-bottom: 10px;
+            color: #1677ff;
+            font-size: 11px;
+            font-weight: 800;
+        }
+
+        .books-hero h1 {
+            margin: 0;
+            color: #142238;
+            font-size: 34px;
+            line-height: 1.25;
+        }
+
+        .books-hero p {
+            max-width: 650px;
+            margin: 14px auto 0;
+            color: #667892;
+            font-size: 13px;
+            line-height: 1.8;
+        }
+
+
+        /* =========================================
+           LIBRARY
+        ========================================= */
+
+        .books-library {
+            padding: 45px 20px 75px;
+        }
+
+        .books-library-inner {
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+
+        .books-section-heading {
+            margin-bottom: 25px;
+        }
+
+        .books-section-heading h2 {
+            margin: 0;
+            color: #142238;
+            font-size: 22px;
+        }
+
+        .books-section-heading p {
+            margin: 7px 0 0;
+            color: #75859a;
+            font-size: 11px;
+        }
+
+        .books-grid {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 20px;
+        }
+
+
+        /* =========================================
+           BOOK CARD
+        ========================================= */
+
+        .book-card {
+            overflow: hidden;
+            border: 1px solid #e2e9f1;
+            border-radius: 18px;
+            background: #ffffff;
+            box-shadow:
+                0 10px 25px
+                rgba(36, 68, 110, 0.06);
+            transition:
+                transform 0.2s ease,
+                box-shadow 0.2s ease;
+        }
+
+        .book-card:hover {
+            transform: translateY(-4px);
+            box-shadow:
+                0 16px 35px
+                rgba(36, 68, 110, 0.11);
+        }
+
+
+        /* =========================================
+           BOOK COVER
+        ========================================= */
+
+        .book-cover {
+            height: 245px;
+            padding: 24px;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            align-items: flex-end;
+        }
+
+        .book-cover::before {
+            content: "";
+            position: absolute;
+            width: 180px;
+            height: 180px;
+            right: -60px;
+            top: -55px;
+            border-radius: 50%;
+            background:
+                rgba(255, 255, 255, 0.18);
+        }
+
+        .book-cover::after {
+            content: "";
+            position: absolute;
+            width: 110px;
+            height: 110px;
+            left: -40px;
+            bottom: -45px;
+            border-radius: 50%;
+            background:
+                rgba(255, 255, 255, 0.12);
+        }
+
+        .book-cover-1 {
+            background:
+                linear-gradient(
+                    145deg,
+                    #1677ff,
+                    #63b0ff
+                );
+        }
+
+        .book-cover-2 {
+            background:
+                linear-gradient(
+                    145deg,
+                    #7957e8,
+                    #a98bf5
+                );
+        }
+
+        .book-cover-3 {
+            background:
+                linear-gradient(
+                    145deg,
+                    #19a980,
+                    #5fd2ad
+                );
+        }
+
+        .book-cover-4 {
+            background:
+                linear-gradient(
+                    145deg,
+                    #ee6b87,
+                    #f6a0b2
+                );
+        }
+
+        .book-number {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            z-index: 2;
+            color:
+                rgba(255, 255, 255, 0.88);
+            font-size: 35px;
+            font-weight: 900;
+        }
+
+        .book-cover-content {
+            position: relative;
+            z-index: 2;
+            color: #ffffff;
+        }
+
+        .book-cover-content span {
+            display: block;
+            margin-bottom: 5px;
+            font-size: 10px;
+            font-weight: 700;
+            opacity: 0.9;
+        }
+
+        .book-cover-content h2 {
+            margin: 0;
+            color: white;
+            font-size: 28px;
+            line-height: 1.2;
+        }
+
+        .book-cover-content p {
+            margin: 6px 0 0;
+            color: white;
+            font-size: 11px;
+            opacity: 0.9;
+        }
+
+
+        /* =========================================
+           CARD BODY
+        ========================================= */
+
+        .book-card-body {
+            padding: 19px;
+        }
+
+        .book-tags {
+            display: flex;
+            gap: 6px;
+            margin-bottom: 11px;
+        }
+
+        .book-tags span {
+            padding: 4px 8px;
+            border-radius: 999px;
+            background: #edf5ff;
+            color: #1677ff;
+            font-size: 9px;
+            font-weight: 800;
+        }
+
+        .book-card-body h3 {
+            margin: 0;
+            color: #142238;
+            font-size: 16px;
+        }
+
+        .book-card-description {
+            min-height: 47px;
+            margin: 8px 0 15px;
+            color: #687a91;
+            font-size: 10.5px;
+            line-height: 1.65;
+        }
+
+        .book-info {
+            padding: 12px 0;
+            margin-bottom: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-top: 1px solid #edf1f6;
+            color: #738399;
+            font-size: 9.5px;
+        }
+
+        .book-available {
+            color: #11a36a;
+            font-weight: 800;
+        }
+
+
+        /* =========================================
+           BUTTON
+        ========================================= */
+
+        .book-read-button {
+            width: 100%;
+            min-height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 11px;
+            background: #1677ff;
+            color: white;
+            text-decoration: none;
+            font-size: 10.5px;
+            font-weight: 800;
+            transition:
+                transform 0.2s ease,
+                box-shadow 0.2s ease;
+        }
+
+        .book-read-button:hover {
+            transform: translateY(-1px);
+            box-shadow:
+                0 7px 16px
+                rgba(22, 119, 255, 0.20);
+        }
+
+
+        /* =========================================
+           RESPONSIVE
+        ========================================= */
+
+        @media (max-width: 1000px) {
+
+            .books-grid {
+                grid-template-columns:
+                    repeat(2, minmax(0, 1fr));
+            }
+
+        }
+
+        @media (max-width: 600px) {
+
+            .books-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .books-hero h1 {
+                font-size: 27px;
+            }
+
+        }
+
+    </style>
+
+    <script src="shared.js"></script>
+</head>
+
+
+<body>
+
+
+<!-- =========================================================
+     HEADER
+========================================================= -->
+
+<div id="site-header"></div>
+
+
+
+<!-- =========================================================
+     BOOKS PAGE
+========================================================= -->
+
+<main class="books-page">
+
+
+    <!-- HERO -->
+
+    <section class="books-hero">
+
+        <div class="books-hero-inner">
+
+            <span class="books-eyebrow">
+                BoBoKa English Books
+            </span>
+
+            <h1>
+                我的英语教材
+            </h1>
+
+            <p>
+                选择一本教材开始阅读。
+                每一本教材都可以直接在线打开完整 PDF。
+            </p>
+
+        </div>
+
+    </section>
+
+
+
+    <!-- BOOK LIBRARY -->
+
+    <section class="books-library">
+
+        <div class="books-library-inner">
+
+
+            <div class="books-section-heading">
+
+                <h2>
+                    📚 教材
+                </h2>
+
+                <p>
+                    当前已上传 4 本教材
+                </p>
+
+            </div>
+
+
+            <div class="books-grid">
+
+
+                <!-- =========================================
+                     BOOK 1
+                ========================================== -->
+
+                <article class="book-card">
+
+                    <div class="book-cover book-cover-1">
+
+                        <div class="book-number">
+                            01
+                        </div>
+
+                        <div class="book-cover-content">
+
+                            <span>
+                                BoBoKa English
+                            </span>
+
+                            <h2>
+                                Book 1
+                            </h2>
+
+                            <p>
+                                English Learning Book
+                            </p>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="book-card-body">
+
+                        <div class="book-tags">
+
+                            <span>
+                                Book 1
+                            </span>
+
+                            <span>
+                                PDF
+                            </span>
+
+                        </div>
+
+
+                        <h3>
+                            BoBoKa English Book 1
+                        </h3>
+
+
+                        <p class="book-card-description">
+                            BoBoKa English 第一册教材，
+                            点击下方按钮即可阅读完整电子书。
+                        </p>
+
+
+                        <div class="book-info">
+
+                            <span>
+                                📖 电子教材
+                            </span>
+
+                            <span class="book-available">
+                                可阅读
+                            </span>
+
+                        </div>
+
+
+                        <a
+                            href="reader.html?book=1"
+                            class="book-read-button"
+                        >
+                            📖 阅读教材 →
+                        </a>
+
+                    </div>
+
+                </article>
+
+
+
+                <!-- =========================================
+                     BOOK 2
+                ========================================== -->
+
+                <article class="book-card">
+
+                    <div class="book-cover book-cover-2">
+
+                        <div class="book-number">
+                            02
+                        </div>
+
+                        <div class="book-cover-content">
+
+                            <span>
+                                BoBoKa English
+                            </span>
+
+                            <h2>
+                                Book 2
+                            </h2>
+
+                            <p>
+                                English Learning Book
+                            </p>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="book-card-body">
+
+                        <div class="book-tags">
+
+                            <span>
+                                Book 2
+                            </span>
+
+                            <span>
+                                PDF
+                            </span>
+
+                        </div>
+
+
+                        <h3>
+                            BoBoKa English Book 2
+                        </h3>
+
+
+                        <p class="book-card-description">
+                            BoBoKa English 第二册教材，
+                            点击下方按钮即可阅读完整电子书。
+                        </p>
+
+
+                        <div class="book-info">
+
+                            <span>
+                                📖 电子教材
+                            </span>
+
+                            <span class="book-available">
+                                可阅读
+                            </span>
+
+                        </div>
+
+
+                        <a
+                            href="reader.html?book=2"
+                            class="book-read-button"
+                        >
+                            📖 阅读教材 →
+                        </a>
+
+                    </div>
+
+                </article>
+
+
+
+                <!-- =========================================
+                     BOOK 3
+                ========================================== -->
+
+                <article class="book-card">
+
+                    <div class="book-cover book-cover-3">
+
+                        <div class="book-number">
+                            03
+                        </div>
+
+                        <div class="book-cover-content">
+
+                            <span>
+                                BoBoKa English
+                            </span>
+
+                            <h2>
+                                Book 3
+                            </h2>
+
+                            <p>
+                                English Learning Book
+                            </p>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="book-card-body">
+
+                        <div class="book-tags">
+
+                            <span>
+                                Book 3
+                            </span>
+
+                            <span>
+                                PDF
+                            </span>
+
+                        </div>
+
+
+                        <h3>
+                            BoBoKa English Book 3
+                        </h3>
+
+
+                        <p class="book-card-description">
+                            BoBoKa English 第三册教材，
+                            点击下方按钮即可阅读完整电子书。
+                        </p>
+
+
+                        <div class="book-info">
+
+                            <span>
+                                📖 电子教材
+                            </span>
+
+                            <span class="book-available">
+                                可阅读
+                            </span>
+
+                        </div>
+
+
+                        <a
+                            href="reader.html?book=3"
+                            class="book-read-button"
+                        >
+                            📖 阅读教材 →
+                        </a>
+
+                    </div>
+
+                </article>
+
+
+
+                <!-- =========================================
+                     BOOK 4
+                ========================================== -->
+
+                <article class="book-card">
+
+                    <div class="book-cover book-cover-4">
+
+                        <div class="book-number">
+                            04
+                        </div>
+
+                        <div class="book-cover-content">
+
+                            <span>
+                                BoBoKa English
+                            </span>
+
+                            <h2>
+                                Book 4
+                            </h2>
+
+                            <p>
+                                English Learning Book
+                            </p>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="book-card-body">
+
+                        <div class="book-tags">
+
+                            <span>
+                                Book 4
+                            </span>
+
+                            <span>
+                                PDF
+                            </span>
+
+                        </div>
+
+
+                        <h3>
+                            BoBoKa English Book 4
+                        </h3>
+
+
+                        <p class="book-card-description">
+                            BoBoKa English 第四册教材，
+                            点击下方按钮即可阅读完整电子书。
+                        </p>
+
+
+                        <div class="book-info">
+
+                            <span>
+                                📖 电子教材
+                            </span>
+
+                            <span class="book-available">
+                                可阅读
+                            </span>
+
+                        </div>
+
+
+                        <a
+                            href="reader.html?book=4"
+                            class="book-read-button"
+                        >
+                            📖 阅读教材 →
+                        </a>
+
+                    </div>
+
+                </article>
+
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+</main>
+
+
+
+<!-- =========================================================
+     FOOTER
+========================================================= -->
+
+<div id="site-footer"></div>
+
+
+<script>
+
+    // 教材是否可以阅读，由服务器决定（登录 + 课程权限）
+    (async function () {
+
+        let result;
+
+        try {
+            result = await BoBoKa.api("/api/books", { noRedirect: true });
+        }
+
+        catch (error) {
+            return;
+        }
+
+        result.data.forEach(book => {
+
+            const link = document.querySelector(
+                '.book-read-button[href="reader.html?book=' + book.number + '"]'
+            );
+
+            if (!link || book.accessible) return;
+
+            link.removeAttribute("href");
+
+            link.style.opacity = "0.55";
+            link.style.cursor = "not-allowed";
+
+            link.textContent = result.logged_in
+                ? "🔒 没有这本教材的权限"
+                : "🔒 登录后阅读";
+
+            if (!result.logged_in) {
+
+                link.setAttribute("href", "login.html?next=books.html");
+
+                link.style.cursor = "pointer";
+            }
+        });
+
+        const label = document.querySelectorAll(".book-available");
+
+        result.data.forEach((book, index) => {
+
+            if (label[index] && !book.accessible) {
+
+                label[index].textContent = "🔒 未开通";
+
+                label[index].style.color = "#9aa7b6";
+            }
+        });
+
+    })();
+
+</script>
+
+</body>
+
+</html>

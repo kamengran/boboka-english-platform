@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>批改作业 | BoBoKa English</title>
+
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="app.css">
+    <script src="shared.js"></script>
+    <script src="homework-ui.js"></script>
+</head>
+
+<body>
+
+<div id="site-header"></div>
+
+<main class="app-page">
+
+    <section class="app-hero">
+        <div class="app-hero-inner">
+            <span class="app-eyebrow">Teacher · Homework</span>
+            <h1>批改作业</h1>
+            <p>创建和管理作业，查看学生提交的每个版本，写反馈、退回修改或标记完成。</p>
+        </div>
+    </section>
+
+    <div class="app-wrap" style="width:min(calc(100% - 32px), 1100px);">
+
+        <div id="loadingArea" class="app-card app-message"><h2>正在读取...</h2></div>
+
+        <div id="errorArea" class="app-card app-message" style="display:none;">
+            <h2 id="errorTitle">暂时无法读取</h2>
+            <p id="errorText"></p>
+        </div>
+
+        <div id="content" style="display:none;">
+
+            <div class="hw-tabs">
+                <button type="button" id="tabSubs" class="active">学生提交</button>
+                <button type="button" id="tabAssign">作业管理</button>
+            </div>
+
+            <!-- ================= 学生提交 ================= -->
+            <div id="subsView">
+
+                <div class="app-card">
+
+                    <div class="hw-filter-bar">
+                        <select id="fCourse"><option value="">全部课程</option></select>
+                        <select id="fLesson"><option value="">全部 Lesson</option></select>
+                        <select id="fStudent"><option value="">全部学生</option></select>
+                        <select id="fStatus">
+                            <option value="">全部状态</option>
+                            <option value="WAITING">等待老师处理（全部）</option>
+                            <option value="SUBMITTED">已提交</option>
+                            <option value="RESUBMITTED">已重新提交</option>
+                            <option value="AI_REVIEWED">AI 已检查</option>
+                            <option value="TEACHER_REVIEW">老师批改中</option>
+                            <option value="NEEDS_REVISION">需要修改</option>
+                            <option value="COMPLETED">已完成</option>
+                        </select>
+                    </div>
+
+                    <div id="subsBody"></div>
+
+                </div>
+
+            </div>
+
+            <!-- ================= 作业管理 ================= -->
+            <div id="assignView" style="display:none;">
+
+                <div class="app-actions" style="margin:0 0 14px;">
+                    <button type="button" id="newButton" class="app-btn">＋ 新建作业</button>
+                </div>
+
+                <!-- 表单 -->
+                <div id="formCard" class="app-card hw-form" style="display:none;margin-bottom:18px;">
+
+                    <h2 id="formTitle">新建作业</h2>
+
+                    <form id="assignForm">
+
+                        <label class="hw-label" for="aTitle">Assignment Title 作业标题</label>
+                        <input id="aTitle" type="text" maxlength="200" required>
+
+                        <div class="hw-row">
+                            <div>
+                                <label class="hw-label" for="aCourse">Related Course 相关课程</label>
+                                <select id="aCourse"></select>
+                            </div>
+                            <div>
+                                <label class="hw-label" for="aLesson">Related Lesson 相关 Lesson</label>
+                                <select id="aLesson"></select>
+                            </div>
+                        </div>
+
+                        <p class="hw-hint" id="lockedHint" style="display:none;">课程和 Lesson 创建后不能修改。</p>
+
+                        <label class="hw-label" for="aInstructions">Instructions 作业说明</label>
+                        <textarea id="aInstructions" placeholder="作业要求由老师填写。"></textarea>
+
+                        <div class="hw-row">
+                            <div>
+                                <label class="hw-label" for="aDue">Due Date 截止日期（可以不填）</label>
+                                <input id="aDue" type="datetime-local">
+                            </div>
+                            <div>
+                                <label class="hw-label" for="aRequired">Required / Optional</label>
+                                <select id="aRequired">
+                                    <option value="1">Required 必做（影响 Lesson 完成）</option>
+                                    <option value="0">Optional 选做</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <label class="hw-label">Allowed Submission Types 允许的提交方式</label>
+                        <div class="hw-checks" id="aTypes">
+                            <label><input type="checkbox" value="text"> 文字</label>
+                            <label><input type="checkbox" value="image"> 图片 / 手写照片</label>
+                            <label><input type="checkbox" value="pdf"> PDF</label>
+                            <label><input type="checkbox" value="document"> Word 文档</label>
+                            <label><input type="checkbox" value="audio"> 音频</label>
+                            <label style="color:#9aa7b6;"><input type="checkbox" value="video" disabled> 视频（预留，暂未开放）</label>
+                        </div>
+
+                        <div class="hw-row">
+                            <div>
+                                <label class="hw-label" for="aResubmit">是否允许重新提交</label>
+                                <select id="aResubmit">
+                                    <option value="1">允许（学生可以提交新版本）</option>
+                                    <option value="0">不允许（除非老师退回修改）</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="hw-label" for="aTeacherReview">是否需要 Teacher Review</label>
+                                <select id="aTeacherReview">
+                                    <option value="1">需要（老师批改后才算完成）</option>
+                                    <option value="0">不需要（学生提交后直接算完成）</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="hw-row">
+                            <div>
+                                <label class="hw-label" for="aAi">是否启用 AI Review</label>
+                                <select id="aAi">
+                                    <option value="0">不启用</option>
+                                    <option value="1">启用（AI 功能尚未接入，只保存设置）</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="hw-label" for="aLevel">AI Feedback Level</label>
+                                <select id="aLevel">
+                                    <option value="1">Level 1：只指出错误</option>
+                                    <option value="2">Level 2：错误 + Hint</option>
+                                    <option value="3">Level 3：错误 + 解释 + Hint</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="hw-row">
+                            <div>
+                                <label class="hw-label" for="aPublished">状态</label>
+                                <select id="aPublished">
+                                    <option value="1">已发布（学生可见）</option>
+                                    <option value="0">未发布 / 下架（学生看不到）</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="hw-label" for="aDemo">类型</label>
+                                <select id="aDemo">
+                                    <option value="1">Demo / Test Homework（测试作业）</option>
+                                    <option value="0">正式作业</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="hw-hint" style="margin-top:8px;">
+                            系统不会自动创建教材作业内容。没有正式作业时，请选择 Demo / Test，避免和教材作业混淆。
+                        </div>
+
+                        <div id="formMessage"></div>
+
+                        <div class="app-actions">
+                            <button type="submit" id="saveButton" class="app-btn">保存作业</button>
+                            <button type="button" id="cancelButton" class="app-btn secondary">取消</button>
+                        </div>
+
+                    </form>
+
+                </div>
+
+                <div id="assignBody"></div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</main>
+
+<div id="site-footer"></div>
+
+<script>
+
+const $ = id => document.getElementById(id);
+
+const esc = BoBoKa.esc;
+
+let courses = [];
+let assignments = [];
+let editingId = null;
+
+
+function showError(title, message) {
+
+    $("loadingArea").style.display = "none";
+    $("content").style.display = "none";
+    $("errorArea").style.display = "block";
+    $("errorTitle").textContent = title;
+    $("errorText").textContent = message;
+}
+
+
+// =========================================================
+// 学生提交
+// =========================================================
+
+async function fillLessons(select, courseCode, emptyLabel) {
+
+    select.innerHTML = `<option value="">${emptyLabel}</option>`;
+
+    if (!courseCode) return;
+
+    const lessons = (await BoBoKa.api(`/api/courses/${encodeURIComponent(courseCode)}/lessons`)).data.lessons;
+
+    select.innerHTML += lessons.map(l =>
+        `<option value="${l.lesson_number}">Lesson ${l.lesson_number} · ${esc(l.title)}</option>`
+    ).join("");
+}
+
+
+async function loadSubmissions() {
+
+    const query = new URLSearchParams();
+
+    for (const [id, key] of [["fCourse", "course"], ["fLesson", "lesson"], ["fStudent", "student"], ["fStatus", "status"]]) {
+        if ($(id).value) query.set(key, $(id).value);
+    }
+
+    const rows = (await BoBoKa.api("/api/teacher/homework/submissions?" + query.toString())).data;
+
+    if (rows.length === 0) {
+
+        $("subsBody").innerHTML = '<div class="app-message"><p>没有符合条件的提交。</p></div>';
+
+        return;
+    }
+
+    $("subsBody").innerHTML = `
+        <table class="hw-table">
+            <thead>
+                <tr><th>学生</th><th>作业</th><th>Lesson</th><th>版本</th><th>状态</th><th>提交时间</th><th></th></tr>
+            </thead>
+            <tbody>
+                ${rows.map(r => `
+                    <tr>
+                        <td><b>${esc(r.student_name)}</b></td>
+                        <td>${esc(r.title)} ${HW.demoBadge(r.is_demo)}</td>
+                        <td>${esc(r.course_code)} · L${r.lesson_number}</td>
+                        <td>V${r.version}${r.version_count > 1 ? ` <span class="app-muted">（共 ${r.version_count} 个版本）</span>` : ""}
+                            ${r.file_count ? ` · 📎${r.file_count}` : ""}</td>
+                        <td>${HW.statusPill(r.status)} ${r.is_late ? '<span class="hw-tag late">迟交</span>' : ""}</td>
+                        <td>${esc(BoBoKa.formatDateTime(r.submitted_at))}</td>
+                        <td><a class="app-btn" style="min-height:34px;padding:0 14px;" href="teacher-review.html?assignment=${r.assignment_id}&student=${r.user_id}">批改</a></td>
+                    </tr>`).join("")}
+            </tbody>
+        </table>`;
+}
+
+
+// =========================================================
+// 作业管理
+// =========================================================
+
+function toLocalInput(iso) {
+
+    if (!iso) return "";
+
+    const d = new Date(iso);
+
+    const pad = n => String(n).padStart(2, "0");
+
+    return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+}
+
+
+async function loadAssignments() {
+
+    assignments = (await BoBoKa.api("/api/teacher/homework/assignments")).data;
+
+    if (assignments.length === 0) {
+
+        $("assignBody").innerHTML = '<div class="app-card app-message"><p>还没有作业。点“新建作业”创建第一份。</p></div>';
+
+        return;
+    }
+
+    $("assignBody").innerHTML = assignments.map(a => `
+        <div class="hw-card" style="${a.is_published ? "" : "opacity:.65;"}">
+            <div class="hw-card-main">
+                <div class="hw-card-title">${esc(a.title)}</div>
+                <div class="hw-card-meta">
+                    ${esc(a.course_title)} · Lesson ${a.lesson_number}
+                    ${HW.requiredBadge(a.is_required)}
+                    ${HW.demoBadge(a.is_demo)}
+                    ${a.is_published ? "" : '<span class="hw-tag">未发布</span>'}
+                    <span>截止：${esc(HW.formatDue(a.due_at))}</span>
+                    <span>提交方式：${a.allowed_types.map(t => esc(HW.TYPE_LABEL[t])).join("、")}</span>
+                </div>
+                <div class="hw-card-meta" style="margin-top:4px;">
+                    学生 ${a.counts.students} 人提交 ·
+                    等待处理 <b>${a.counts.waiting}</b> ·
+                    需要修改 ${a.counts.needs_revision} ·
+                    已完成 ${a.counts.completed}
+                    ${a.ai_review_enabled ? ` · AI Review 设置 Level ${a.ai_feedback_level}（未接入）` : ""}
+                </div>
+            </div>
+            <div class="app-actions" style="margin:0;">
+                <button type="button" class="app-btn secondary" data-view="${a.id}">看提交</button>
+                <button type="button" class="app-btn secondary" data-edit="${a.id}">编辑</button>
+            </div>
+        </div>`).join("");
+}
+
+
+function fillForm(a) {
+
+    $("formTitle").textContent = a ? "编辑作业" : "新建作业";
+
+    $("aTitle").value = a ? a.title : "";
+    $("aInstructions").value = a ? (a.instructions || "") : "";
+    $("aDue").value = a ? toLocalInput(a.due_at) : "";
+    $("aRequired").value = a ? (a.is_required ? "1" : "0") : "1";
+    $("aResubmit").value = a ? (a.allow_resubmit ? "1" : "0") : "1";
+    $("aTeacherReview").value = a ? (a.teacher_review_required ? "1" : "0") : "1";
+    $("aAi").value = a ? (a.ai_review_enabled ? "1" : "0") : "0";
+    $("aLevel").value = a ? String(a.ai_feedback_level) : "1";
+    $("aPublished").value = a ? (a.is_published ? "1" : "0") : "1";
+    $("aDemo").value = a ? (a.is_demo ? "1" : "0") : "1";
+
+    const types = a ? a.allowed_types : ["text"];
+
+    $("aTypes").querySelectorAll("input").forEach(box => { box.checked = types.includes(box.value); });
+
+    $("aCourse").disabled = Boolean(a);
+    $("aLesson").disabled = Boolean(a);
+    $("lockedHint").style.display = a ? "block" : "none";
+
+    $("formMessage").innerHTML = "";
+}
+
+
+async function openForm(a) {
+
+    editingId = a ? a.id : null;
+
+    $("aCourse").innerHTML = courses.map(c => `<option value="${esc(c.course_code)}">${esc(c.title)}</option>`).join("");
+
+    if (a) $("aCourse").value = a.course_code;
+
+    const lessons = (await BoBoKa.api(`/api/courses/${encodeURIComponent($("aCourse").value)}/lessons`)).data.lessons;
+
+    $("aLesson").innerHTML = lessons.map(l => `<option value="${l.lesson_number}">Lesson ${l.lesson_number} · ${esc(l.title)}</option>`).join("");
+
+    if (a) $("aLesson").value = String(a.lesson_number);
+
+    fillForm(a);
+
+    $("formCard").style.display = "block";
+
+    $("formCard").scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
+
+$("aCourse").addEventListener("change", async () => {
+
+    const lessons = (await BoBoKa.api(`/api/courses/${encodeURIComponent($("aCourse").value)}/lessons`)).data.lessons;
+
+    $("aLesson").innerHTML = lessons.map(l => `<option value="${l.lesson_number}">Lesson ${l.lesson_number} · ${esc(l.title)}</option>`).join("");
+});
+
+
+$("newButton").addEventListener("click", () => openForm(null));
+
+$("cancelButton").addEventListener("click", () => { $("formCard").style.display = "none"; });
+
+
+$("assignBody").addEventListener("click", event => {
+
+    const edit = event.target.closest("button[data-edit]");
+
+    if (edit) {
+        openForm(assignments.find(a => a.id === Number(edit.dataset.edit)));
+        return;
+    }
+
+    const view = event.target.closest("button[data-view]");
+
+    if (view) {
+
+        setTab("subs");
+
+        // 按这份作业筛选：用课程 + Lesson 缩小范围
+        const a = assignments.find(x => x.id === Number(view.dataset.view));
+
+        $("fCourse").value = a.course_code;
+
+        fillLessons($("fLesson"), a.course_code, "全部 Lesson").then(() => {
+            $("fLesson").value = String(a.lesson_number);
+            loadSubmissions();
+        });
+    }
+});
+
+
+$("assignForm").addEventListener("submit", async event => {
+
+    event.preventDefault();
+
+    const types = Array.from($("aTypes").querySelectorAll("input:checked")).map(b => b.value);
+
+    const body = {
+        title: $("aTitle").value,
+        instructions: $("aInstructions").value,
+        due_at: $("aDue").value ? new Date($("aDue").value).toISOString() : null,
+        is_required: $("aRequired").value === "1",
+        allowed_types: types,
+        allow_resubmit: $("aResubmit").value === "1",
+        teacher_review_required: $("aTeacherReview").value === "1",
+        ai_review_enabled: $("aAi").value === "1",
+        ai_feedback_level: Number($("aLevel").value),
+        is_published: $("aPublished").value === "1",
+        is_demo: $("aDemo").value === "1"
+    };
+
+    if (!editingId) {
+        body.course_code = $("aCourse").value;
+        body.lesson_number = Number($("aLesson").value);
+    }
+
+    $("saveButton").disabled = true;
+
+    try {
+
+        if (editingId) {
+            await BoBoKa.put(`/api/teacher/homework/assignments/${editingId}`, body);
+        }
+
+        else {
+            await BoBoKa.post("/api/teacher/homework/assignments", body);
+        }
+
+        $("formCard").style.display = "none";
+
+        await loadAssignments();
+
+    }
+
+    catch (error) {
+
+        $("formMessage").innerHTML = `<div class="hw-error">${esc(error.message)}</div>`;
+    }
+
+    $("saveButton").disabled = false;
+});
+
+
+// =========================================================
+// 标签页 / 启动
+// =========================================================
+
+function setTab(name) {
+
+    $("tabSubs").classList.toggle("active", name === "subs");
+    $("tabAssign").classList.toggle("active", name === "assign");
+    $("subsView").style.display = name === "subs" ? "block" : "none";
+    $("assignView").style.display = name === "assign" ? "block" : "none";
+
+    history.replaceState(null, "", "#" + name);
+}
+
+$("tabSubs").addEventListener("click", () => { setTab("subs"); loadSubmissions(); });
+$("tabAssign").addEventListener("click", () => { setTab("assign"); loadAssignments(); });
+
+
+$("fCourse").addEventListener("change", async () => {
+    await fillLessons($("fLesson"), $("fCourse").value, "全部 Lesson");
+    loadSubmissions();
+});
+
+["fLesson", "fStudent", "fStatus"].forEach(id => $(id).addEventListener("change", loadSubmissions));
+
+
+async function start() {
+
+    try {
+
+        const me = await BoBoKa.requireLogin();
+
+        if (me.user.role !== "teacher" && me.user.role !== "admin") {
+
+            showError("只有老师或助教可以使用这个页面", "学生请到“作业”页面查看和提交作业。");
+
+            return;
+        }
+
+        courses = (await BoBoKa.api("/api/courses")).data;
+
+        $("fCourse").innerHTML += courses.map(c => `<option value="${esc(c.course_code)}">${esc(c.title)}</option>`).join("");
+
+        const students = (await BoBoKa.api("/api/teacher/homework/students")).data;
+
+        $("fStudent").innerHTML += students.map(s => `<option value="${s.id}">${esc(s.nickname)}</option>`).join("");
+
+        $("loadingArea").style.display = "none";
+        $("content").style.display = "block";
+
+        await loadSubmissions();
+
+        if (location.hash === "#assign") {
+            setTab("assign");
+            loadAssignments();
+        }
+
+    }
+
+    catch (error) {
+
+        showError("暂时无法读取", error.message);
+    }
+}
+
+start();
+
+</script>
+
+</body>
+</html>

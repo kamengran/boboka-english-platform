@@ -1,0 +1,1522 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>打字练习 | BoBoKa English</title>
+
+    <link rel="stylesheet" href="style.css">
+
+    <style>
+        .typing-page {
+            min-height: 780px;
+            background: #f6f9fd;
+        }
+
+        .typing-hero {
+            padding: 45px 20px 28px;
+            text-align: center;
+            background: linear-gradient(
+                135deg,
+                #f5faff 0%,
+                #ffffff 55%,
+                #fff8fb 100%
+            );
+        }
+
+        .typing-hero-inner {
+            max-width: 850px;
+            margin: 0 auto;
+        }
+
+        .typing-eyebrow {
+            display: inline-block;
+            margin-bottom: 9px;
+            color: #1677ff;
+            font-size: 11px;
+            font-weight: 800;
+        }
+
+        .typing-hero h1 {
+            margin: 0;
+            color: #142238;
+            font-size: 32px;
+        }
+
+        .typing-hero p {
+            margin: 12px 0 0;
+            color: #687a91;
+            font-size: 12px;
+            line-height: 1.7;
+        }
+
+        .typing-section {
+            padding: 35px 20px 70px;
+        }
+
+        .typing-container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .typing-course-card {
+            margin-bottom: 18px;
+            padding: 18px 22px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 20px;
+            border: 1px solid #e2e9f1;
+            border-radius: 16px;
+            background: white;
+        }
+
+        .typing-course-card span {
+            display: block;
+            margin-bottom: 4px;
+            color: #1677ff;
+            font-size: 9px;
+            font-weight: 800;
+        }
+
+        .typing-course-card h2 {
+            margin: 0;
+            color: #142238;
+            font-size: 17px;
+        }
+
+        .typing-course-card p {
+            margin: 5px 0 0;
+            color: #748399;
+            font-size: 10.5px;
+        }
+
+        .back-lesson-button {
+            padding: 9px 14px;
+            flex-shrink: 0;
+            border: 1px solid #cfe0f6;
+            border-radius: 999px;
+            color: #1677ff;
+            text-decoration: none;
+            font-size: 10px;
+            font-weight: 800;
+        }
+
+        .typing-stats {
+            margin-bottom: 18px;
+            padding: 19px 20px;
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            border: 1px solid #e2e9f1;
+            border-radius: 17px;
+            background: white;
+            box-shadow: 0 8px 25px rgba(31, 68, 110, 0.05);
+        }
+
+        .typing-stat {
+            text-align: center;
+            border-right: 1px solid #edf1f6;
+        }
+
+        .typing-stat:last-child {
+            border-right: none;
+        }
+
+        .typing-stat span {
+            display: block;
+            margin-bottom: 5px;
+            color: #8090a5;
+            font-size: 9px;
+            font-weight: 700;
+        }
+
+        .typing-stat strong {
+            color: #142238;
+            font-size: 24px;
+        }
+
+        .typing-stat.accuracy strong {
+            color: #1677ff;
+        }
+
+        .typing-card {
+            padding: 28px;
+            border: 1px solid #e2e9f1;
+            border-radius: 20px;
+            background: white;
+            box-shadow: 0 12px 30px rgba(31, 68, 110, 0.06);
+        }
+
+        .typing-card-top {
+            margin-bottom: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .typing-source {
+            padding: 5px 9px;
+            border-radius: 999px;
+            background: #edf5ff;
+            color: #1677ff;
+            font-size: 9px;
+            font-weight: 800;
+        }
+
+        .typing-counter {
+            color: #8190a4;
+            font-size: 10px;
+        }
+
+        .typing-target {
+            min-height: 95px;
+            padding: 19px;
+            margin-bottom: 17px;
+            border-radius: 14px;
+            background: #f7f9fc;
+            color: #30425b;
+            font-size: 18px;
+            line-height: 1.8;
+        }
+
+        .typing-target .correct {
+            color: #16a36a;
+        }
+
+        .typing-target .incorrect {
+            color: #e55353;
+            background: #fff0f0;
+        }
+
+        .typing-target .current {
+            border-bottom: 2px solid #1677ff;
+        }
+
+        .typing-input {
+            width: 100%;
+            min-height: 120px;
+            padding: 17px;
+            resize: vertical;
+            border: 2px solid #dfe7f1;
+            border-radius: 14px;
+            outline: none;
+            color: #26374d;
+            background: white;
+            font-family: inherit;
+            font-size: 15px;
+            line-height: 1.7;
+            box-sizing: border-box;
+        }
+
+        .typing-input:focus {
+            border-color: #1677ff;
+            box-shadow: 0 0 0 4px rgba(22, 119, 255, 0.08);
+        }
+
+        .typing-input::placeholder {
+            color: #a0acba;
+        }
+
+        .typing-feedback {
+            min-height: 25px;
+            margin-top: 10px;
+            font-size: 11px;
+            font-weight: 700;
+        }
+
+        .typing-feedback.success {
+            color: #11a36a;
+        }
+
+        .typing-feedback.error {
+            color: #e55353;
+        }
+
+        .typing-actions {
+            margin-top: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+        }
+
+        .typing-left-actions,
+        .typing-right-actions {
+            display: flex;
+            gap: 9px;
+        }
+
+        .typing-button {
+            min-height: 38px;
+            padding: 0 15px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 10px;
+            font-weight: 800;
+        }
+
+        .typing-button.secondary {
+            border: 1px solid #d8e2ee;
+            background: white;
+            color: #52657e;
+        }
+
+        .typing-button.primary {
+            border: 1px solid #1677ff;
+            background: #1677ff;
+            color: white;
+        }
+
+        .typing-button.primary:disabled {
+            background: #bdd5f7;
+            border-color: #bdd5f7;
+            cursor: not-allowed;
+        }
+
+        .typing-message {
+            padding: 45px 20px;
+            border: 1px solid #e2e9f1;
+            border-radius: 18px;
+            background: white;
+            text-align: center;
+            color: #718096;
+            font-size: 12px;
+        }
+
+        .typing-message h2 {
+            margin: 0 0 8px;
+            color: #142238;
+            font-size: 18px;
+        }
+
+        .typing-complete {
+            padding: 35px;
+            text-align: center;
+        }
+
+        .typing-complete-icon {
+            margin-bottom: 12px;
+            font-size: 42px;
+        }
+
+        .typing-complete h2 {
+            color: #142238;
+            font-size: 22px;
+        }
+
+        .typing-complete p {
+            color: #687a91;
+            font-size: 11.5px;
+        }
+
+        @media (max-width: 700px) {
+            .typing-stats {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 18px 0;
+            }
+
+            .typing-stat:nth-child(2) {
+                border-right: none;
+            }
+
+            .typing-actions {
+                align-items: stretch;
+                flex-direction: column;
+            }
+
+            .typing-left-actions,
+            .typing-right-actions {
+                width: 100%;
+            }
+
+            .typing-button {
+                flex: 1;
+            }
+
+            .typing-course-card {
+                align-items: flex-start;
+                flex-direction: column;
+            }
+        }
+    </style>
+    <script src="shared.js"></script>
+</head>
+
+<body>
+
+<div id="site-header"></div>
+
+<main class="typing-page">
+
+    <section class="typing-hero">
+        <div class="typing-hero-inner">
+
+            <span class="typing-eyebrow">
+                Lesson Typing Practice
+            </span>
+
+            <h1>本课打字练习</h1>
+
+            <p>
+                使用你正在学习的课程内容练习英语拼写和句子结构。
+            </p>
+
+        </div>
+    </section>
+
+    <section class="typing-section">
+
+        <div class="typing-container">
+
+            <div id="loadingArea" class="typing-message">
+                <h2>正在读取课程...</h2>
+                <p>正在从本课内容生成打字练习。</p>
+            </div>
+
+            <div
+                id="errorArea"
+                class="typing-message"
+                style="display:none;"
+            >
+                <h2>暂时无法读取课程</h2>
+                <p id="errorText"></p>
+            </div>
+
+            <div
+                id="pickerArea"
+                style="display:none;"
+            ></div>
+
+            <div
+                id="practiceArea"
+                style="display:none;"
+            >
+
+                <div class="typing-course-card">
+
+                    <div>
+                        <span id="courseLabel">
+                            BoBoKa English
+                        </span>
+
+                        <h2 id="lessonTitle">
+                            Lesson
+                        </h2>
+
+                        <p id="lessonChinese"></p>
+                    </div>
+
+                    <a
+                        id="backLessonButton"
+                        href="lesson.html"
+                        class="back-lesson-button"
+                    >
+                        ← 返回本课
+                    </a>
+
+                </div>
+
+                <div class="typing-stats">
+
+                    <div class="typing-stat">
+                        <span>WPM</span>
+                        <strong id="wpmValue">0</strong>
+                    </div>
+
+                    <div class="typing-stat accuracy">
+                        <span>ACCURACY</span>
+                        <strong id="accuracyValue">100%</strong>
+                    </div>
+
+                    <div class="typing-stat">
+                        <span>TIME</span>
+                        <strong id="timeValue">0:00</strong>
+                    </div>
+
+                    <div class="typing-stat">
+                        <span>SENTENCE</span>
+                        <strong id="sentenceValue">1/1</strong>
+                    </div>
+
+                </div>
+
+                <div class="typing-card">
+
+                    <div class="typing-card-top">
+
+                        <span
+                            id="sourceLabel"
+                            class="typing-source"
+                        >
+                            Dialogue
+                        </span>
+
+                        <span
+                            id="counterLabel"
+                            class="typing-counter"
+                        ></span>
+
+                    </div>
+
+                    <div
+                        id="targetSentence"
+                        class="typing-target"
+                    ></div>
+
+                    <textarea
+                        id="typingInput"
+                        class="typing-input"
+                        placeholder="请在这里输入上面的英文句子..."
+                        spellcheck="false"
+                        autocomplete="off"
+                    ></textarea>
+
+                    <div
+                        id="feedback"
+                        class="typing-feedback"
+                    ></div>
+
+                    <div class="typing-actions">
+
+                        <div class="typing-left-actions">
+
+                            <button
+                                id="restartButton"
+                                class="typing-button secondary"
+                                type="button"
+                            >
+                                ↻ 重新开始
+                            </button>
+
+                            <button
+                                id="clearButton"
+                                class="typing-button secondary"
+                                type="button"
+                            >
+                                清空
+                            </button>
+
+                        </div>
+
+                        <div class="typing-right-actions">
+
+                            <button
+                                id="nextButton"
+                                class="typing-button primary"
+                                type="button"
+                                disabled
+                            >
+                                下一句 →
+                            </button>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+            <div
+                id="completeArea"
+                class="typing-card typing-complete"
+                style="display:none;"
+            >
+
+                <div class="typing-complete-icon">
+                    🎉
+                </div>
+
+                <h2>
+                    本课打字练习完成
+                </h2>
+
+                <p id="completeResult"></p>
+
+                <p id="saveStatus" class="app-muted" style="margin-bottom:14px;"></p>
+
+                <div
+                    class="typing-actions"
+                    style="justify-content:center;"
+                >
+
+                    <button
+                        id="practiceAgainButton"
+                        class="typing-button secondary"
+                    >
+                        再练一次
+                    </button>
+
+                    <a
+                        id="returnLessonButton"
+                        href="lesson.html"
+                        class="typing-button primary"
+                        style="text-decoration:none;"
+                    >
+                        返回课程
+                    </a>
+
+                </div>
+
+            </div>
+
+        </div>
+    </section>
+
+</main>
+
+<div id="site-footer"></div>
+
+<script>
+
+const params =
+    new URLSearchParams(
+        window.location.search
+    );
+
+const courseCode =
+    params.get("course") ||
+    "speaking1";
+
+const hasLessonParam =
+    params.has("lesson");
+
+const lessonNumber =
+    Number(
+        params.get("lesson") || 0
+    );
+
+// 打字统计（按键计数：退格改正也会记为错误）
+let totalKeystrokes = 0;
+
+let totalMistakes = 0;
+
+
+let sentences = [];
+
+let currentIndex = 0;
+
+let started = false;
+
+let startTime = null;
+
+let timerInterval = null;
+
+let completedCharacters = 0;
+
+
+const loadingArea =
+    document.getElementById("loadingArea");
+
+const errorArea =
+    document.getElementById("errorArea");
+
+const practiceArea =
+    document.getElementById("practiceArea");
+
+const completeArea =
+    document.getElementById("completeArea");
+
+const typingInput =
+    document.getElementById("typingInput");
+
+const targetSentence =
+    document.getElementById("targetSentence");
+
+const feedback =
+    document.getElementById("feedback");
+
+const nextButton =
+    document.getElementById("nextButton");
+
+
+async function loadLesson() {
+
+    // 没有指定 Lesson：让学生自己选，而不是悄悄默认第 1 课
+    if (!hasLessonParam) {
+
+        loadingArea.style.display =
+            "none";
+
+        const picker =
+            document.getElementById("pickerArea");
+
+        picker.style.display =
+            "block";
+
+        BoBoKa.lessonPicker(
+            picker,
+            "typing-practice.html",
+            "选择要练习打字的一课"
+        );
+
+        return;
+    }
+
+    try {
+
+        const result =
+            await BoBoKa.api(
+                `/api/courses/${encodeURIComponent(courseCode)}/lessons/${lessonNumber}`
+            );
+
+        prepareLesson(
+            result.data
+        );
+
+    } catch (error) {
+
+        loadingArea.style.display =
+            "none";
+
+        errorArea.style.display =
+            "block";
+
+        document.getElementById(
+            "errorText"
+        ).textContent =
+            error.message;
+    }
+}
+
+
+function prepareLesson(data) {
+
+    const lesson =
+        data.lesson;
+
+    document.getElementById(
+        "courseLabel"
+    ).textContent =
+        lesson.course_title ||
+        "BoBoKa English Speaking 1";
+
+    document.getElementById(
+        "lessonTitle"
+    ).textContent =
+        `Lesson ${lesson.lesson_number} · ${lesson.title}`;
+
+    document.getElementById(
+        "lessonChinese"
+    ).textContent =
+        lesson.chinese_title || "";
+
+    const lessonLink =
+        `lesson.html?course=${courseCode}&lesson=${lessonNumber}`;
+
+    document.getElementById(
+        "backLessonButton"
+    ).href =
+        lessonLink;
+
+    document.getElementById(
+        "returnLessonButton"
+    ).href =
+        lessonLink;
+
+    sentences =
+        buildTypingSentences(
+            data
+        );
+
+    if (
+        sentences.length === 0
+    ) {
+        throw new Error(
+            "这一课暂时没有可用于打字练习的英文句子。"
+        );
+    }
+
+    loadingArea.style.display =
+        "none";
+
+    practiceArea.style.display =
+        "block";
+
+    resetPractice();
+}
+
+
+function buildTypingSentences(data) {
+
+    const list = [];
+
+    (
+        data.dialogues || []
+    ).forEach(dialogue => {
+
+        (
+            dialogue.lines || []
+        ).forEach(line => {
+
+            if (
+                line.english &&
+                line.english.trim()
+            ) {
+
+                list.push({
+                    text:
+                        line.english.trim(),
+
+                    source:
+                        dialogue.dialogue_type ||
+                        "Dialogue"
+                });
+
+            }
+
+        });
+
+    });
+
+
+    (
+        data.patterns || []
+    ).forEach(pattern => {
+
+        (
+            pattern.examples || []
+        ).forEach(example => {
+
+            const text =
+                typeof example === "string"
+                ? example
+                : example.example;
+
+            if (
+                text &&
+                text.trim()
+            ) {
+
+                list.push({
+                    text:
+                        text.trim(),
+
+                    source:
+                        "Core Pattern"
+                });
+
+            }
+
+        });
+
+    });
+
+
+    const seen =
+        new Set();
+
+    return list.filter(item => {
+
+        const key =
+            normalizeText(
+                item.text
+            );
+
+        if (
+            seen.has(key)
+        ) {
+            return false;
+        }
+
+        seen.add(key);
+
+        return true;
+
+    });
+}
+
+
+function showSentence() {
+
+    const item =
+        sentences[currentIndex];
+
+    document.getElementById(
+        "sourceLabel"
+    ).textContent =
+        item.source;
+
+    document.getElementById(
+        "counterLabel"
+    ).textContent =
+        `第 ${currentIndex + 1} 句 / 共 ${sentences.length} 句`;
+
+    document.getElementById(
+        "sentenceValue"
+    ).textContent =
+        `${currentIndex + 1}/${sentences.length}`;
+
+    targetSentence.textContent =
+        item.text;
+
+    typingInput.value =
+        "";
+
+    feedback.textContent =
+        "";
+
+    feedback.className =
+        "typing-feedback";
+
+    nextButton.disabled =
+        true;
+
+    typingInput.focus();
+}
+
+
+typingInput.addEventListener(
+    "input",
+    function (event) {
+
+        if (!started) {
+            startTimer();
+        }
+
+        // 只统计“输入”动作，不统计删除
+        if (
+            event.inputType &&
+            event.inputType.startsWith("insert")
+        ) {
+
+            const typed =
+                typingInput.value;
+
+            const index =
+                typed.length - 1;
+
+            const target =
+                sentences[currentIndex].text;
+
+            totalKeystrokes++;
+
+            if (
+                index >= target.length ||
+                normalizeCharacter(typed[index]) !==
+                normalizeCharacter(target[index])
+            ) {
+                totalMistakes++;
+            }
+
+        }
+
+        updateTypingDisplay();
+        updateStats();
+
+    }
+);
+
+
+function updateTypingDisplay() {
+
+    const target =
+        sentences[currentIndex].text;
+
+    const typed =
+        typingInput.value;
+
+    let html = "";
+
+    for (
+        let i = 0;
+        i < target.length;
+        i++
+    ) {
+
+        const character =
+            escapeHTML(
+                target[i]
+            );
+
+        if (
+            i < typed.length
+        ) {
+
+            if (
+                normalizeCharacter(
+                    typed[i]
+                ) ===
+                normalizeCharacter(
+                    target[i]
+                )
+            ) {
+
+                html +=
+                    `<span class="correct">${character}</span>`;
+
+            } else {
+
+                html +=
+                    `<span class="incorrect">${character}</span>`;
+
+            }
+
+        } else if (
+            i === typed.length
+        ) {
+
+            html +=
+                `<span class="current">${character}</span>`;
+
+        } else {
+
+            html +=
+                character;
+
+        }
+
+    }
+
+    targetSentence.innerHTML =
+        html;
+
+
+    const isCorrect =
+        normalizeText(typed) ===
+        normalizeText(target);
+
+
+    if (isCorrect) {
+
+        feedback.textContent =
+            "✓ 完全正确！可以进入下一句。";
+
+        feedback.className =
+            "typing-feedback success";
+
+        nextButton.disabled =
+            false;
+
+    } else {
+
+        nextButton.disabled =
+            true;
+
+        if (
+            typed.length > 0
+        ) {
+
+            const mistakes =
+                countMistakes(
+                    typed,
+                    target
+                );
+
+            if (
+                mistakes > 0
+            ) {
+
+                feedback.textContent =
+                    `还有 ${mistakes} 个字符需要检查。`;
+
+                feedback.className =
+                    "typing-feedback error";
+
+            } else {
+
+                feedback.textContent =
+                    "继续输入完整句子。";
+
+                feedback.className =
+                    "typing-feedback";
+
+            }
+
+        } else {
+
+            feedback.textContent =
+                "";
+
+            feedback.className =
+                "typing-feedback";
+
+        }
+
+    }
+
+}
+
+
+function updateStats() {
+
+    const target =
+        sentences[currentIndex].text;
+
+    const typed =
+        typingInput.value;
+
+
+    let correct = 0;
+
+    for (
+        let i = 0;
+        i < typed.length;
+        i++
+    ) {
+
+        if (
+            i < target.length &&
+            normalizeCharacter(
+                typed[i]
+            ) ===
+            normalizeCharacter(
+                target[i]
+            )
+        ) {
+            correct++;
+        }
+
+    }
+
+
+    const accuracy =
+        totalKeystrokes === 0
+        ? 100
+        : Math.max(
+            0,
+            Math.round(
+                (
+                    (totalKeystrokes - totalMistakes) /
+                    totalKeystrokes
+                ) *
+                100
+            )
+        );
+
+
+    document.getElementById(
+        "accuracyValue"
+    ).textContent =
+        `${accuracy}%`;
+
+
+    if (
+        started &&
+        startTime
+    ) {
+
+        const minutes =
+            (
+                Date.now() -
+                startTime
+            ) /
+            60000;
+
+        const characters =
+            completedCharacters +
+            typed.length;
+
+        const words =
+            characters / 5;
+
+        const wpm =
+            minutes > 0
+            ? Math.round(
+                words /
+                minutes
+            )
+            : 0;
+
+        document.getElementById(
+            "wpmValue"
+        ).textContent =
+            wpm;
+
+    }
+
+}
+
+
+function startTimer() {
+
+    started =
+        true;
+
+    startTime =
+        Date.now();
+
+    timerInterval =
+        setInterval(
+            updateTime,
+            1000
+        );
+}
+
+
+function updateTime() {
+
+    if (!startTime) {
+        return;
+    }
+
+    const seconds =
+        Math.floor(
+            (
+                Date.now() -
+                startTime
+            ) /
+            1000
+        );
+
+    const minutes =
+        Math.floor(
+            seconds / 60
+        );
+
+    const remaining =
+        seconds % 60;
+
+    document.getElementById(
+        "timeValue"
+    ).textContent =
+        `${minutes}:${String(remaining).padStart(2, "0")}`;
+}
+
+
+nextButton.addEventListener(
+    "click",
+    nextSentence
+);
+
+
+function nextSentence() {
+
+    const target =
+        sentences[currentIndex].text;
+
+    const typed =
+        typingInput.value;
+
+
+    if (
+        normalizeText(typed) !==
+        normalizeText(target)
+    ) {
+
+        feedback.textContent =
+            "请先正确输入完整句子，再进入下一句。";
+
+        feedback.className =
+            "typing-feedback error";
+
+        return;
+    }
+
+
+    completedCharacters +=
+        target.length;
+
+
+    if (
+        currentIndex <
+        sentences.length - 1
+    ) {
+
+        currentIndex++;
+
+        showSentence();
+
+    } else {
+
+        finishPractice();
+
+    }
+
+}
+
+
+document.getElementById(
+    "clearButton"
+).addEventListener(
+    "click",
+    function () {
+
+        typingInput.value =
+            "";
+
+        updateTypingDisplay();
+
+        updateStats();
+
+        typingInput.focus();
+
+    }
+);
+
+
+document.getElementById(
+    "restartButton"
+).addEventListener(
+    "click",
+    resetPractice
+);
+
+
+document.getElementById(
+    "practiceAgainButton"
+).addEventListener(
+    "click",
+    function () {
+
+        completeArea.style.display =
+            "none";
+
+        practiceArea.style.display =
+            "block";
+
+        resetPractice();
+
+    }
+);
+
+
+function resetPractice() {
+
+    currentIndex =
+        0;
+
+    started =
+        false;
+
+    startTime =
+        null;
+
+    completedCharacters =
+        0;
+
+    totalKeystrokes =
+        0;
+
+    totalMistakes =
+        0;
+
+
+    if (
+        timerInterval
+    ) {
+
+        clearInterval(
+            timerInterval
+        );
+
+        timerInterval =
+            null;
+
+    }
+
+
+    document.getElementById(
+        "wpmValue"
+    ).textContent =
+        "0";
+
+    document.getElementById(
+        "accuracyValue"
+    ).textContent =
+        "100%";
+
+    document.getElementById(
+        "timeValue"
+    ).textContent =
+        "0:00";
+
+    showSentence();
+}
+
+
+function finishPractice() {
+
+    if (
+        timerInterval
+    ) {
+
+        clearInterval(
+            timerInterval
+        );
+
+        timerInterval =
+            null;
+
+    }
+
+
+    const seconds =
+        startTime
+        ? Math.floor(
+            (
+                Date.now() -
+                startTime
+            ) /
+            1000
+        )
+        : 0;
+
+
+    const minutes =
+        seconds / 60;
+
+
+    const words =
+        completedCharacters /
+        5;
+
+
+    const finalWpm =
+        minutes > 0
+        ? Math.round(
+            words /
+            minutes
+        )
+        : 0;
+
+
+    practiceArea.style.display =
+        "none";
+
+    completeArea.style.display =
+        "block";
+
+
+    const finalAccuracy =
+        totalKeystrokes === 0
+        ? 100
+        : Math.max(
+            0,
+            Math.round(
+                (
+                    (totalKeystrokes - totalMistakes) /
+                    totalKeystrokes
+                ) *
+                100
+            )
+        );
+
+
+    document.getElementById(
+        "completeResult"
+    ).textContent =
+        `你完成了 ${sentences.length} 个课程句子，速度约 ${finalWpm} WPM，准确率 ${finalAccuracy}%，用时 ${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, "0")}。`;
+
+
+    // 保存到我的学习记录（服务器数据库）
+    const saveStatus =
+        document.getElementById("saveStatus");
+
+    saveStatus.textContent = "正在保存...";
+
+    BoBoKa.post(
+        BoBoKa.lessonApi(courseCode, lessonNumber, "/typing-results"),
+        {
+            accuracy: finalAccuracy,
+            wpm: finalWpm,
+            seconds: seconds,
+            sentence_count: sentences.length,
+            mistakes: totalMistakes
+        }
+    ).then(result => {
+
+        const s = result.data.stats;
+
+        saveStatus.textContent =
+            "✓ 已保存到你的学习记录。" +
+            (
+                s.typing.count > 1
+                    ? "最高准确率 " + s.typing.best_accuracy + "%。"
+                    : ""
+            );
+
+    }).catch(error => {
+
+        saveStatus.textContent =
+            "⚠ 结果没有保存成功：" + error.message;
+
+    });
+}
+
+
+function normalizeText(text) {
+
+    return String(text)
+        .trim()
+        .replace(/\s+/g, " ")
+        .replace(/[‘’]/g, "'")
+        .replace(/[“”]/g, '"')
+        .toLowerCase();
+}
+
+
+function normalizeCharacter(character) {
+
+    return String(character)
+        .replace(/[‘’]/g, "'")
+        .replace(/[“”]/g, '"')
+        .toLowerCase();
+}
+
+
+function countMistakes(
+    typed,
+    target
+) {
+
+    const normalizedTyped =
+        normalizeText(typed);
+
+    const normalizedTarget =
+        normalizeText(target);
+
+
+    const maxLength =
+        Math.max(
+            normalizedTyped.length,
+            normalizedTarget.length
+        );
+
+
+    let mistakes =
+        0;
+
+
+    for (
+        let i = 0;
+        i < maxLength;
+        i++
+    ) {
+
+        if (
+            normalizedTyped[i] !==
+            normalizedTarget[i]
+        ) {
+            mistakes++;
+        }
+
+    }
+
+
+    return mistakes;
+}
+
+
+function escapeHTML(value) {
+
+    return String(value)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+}
+
+
+loadLesson();
+
+</script>
+
+</body>
+</html>

@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>口语练习 | BoBoKa English</title>
+
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="app.css">
+    <script src="shared.js"></script>
+</head>
+
+<body>
+
+<div id="site-header"></div>
+
+<main class="app-page">
+
+    <section class="app-hero">
+        <div class="app-hero-inner">
+            <span class="app-eyebrow">Speaking Practice</span>
+            <h1>本课口语练习</h1>
+            <p>练习内容来自当前 Lesson 的对话、核心句型、Guided Output 和 Free Output。可以跟读、回答、自由表达并录音回听。</p>
+        </div>
+    </section>
+
+    <div class="app-wrap">
+
+        <div id="pickerArea" style="display:none;"></div>
+
+        <div id="loadingArea" class="app-card app-message">
+            <h2>正在读取口语练习...</h2>
+        </div>
+
+        <div id="errorArea" class="app-card app-message" style="display:none;">
+            <h2>暂时无法读取口语练习</h2>
+            <p id="errorText"></p>
+        </div>
+
+        <div id="emptyArea" class="app-card app-message" style="display:none;">
+            <h2 id="emptyTitle">本课暂时没有口语练习</h2>
+            <p id="emptyText"></p>
+            <div class="app-actions center">
+                <a id="emptyBack" href="courses.html" class="app-btn secondary">返回课程</a>
+            </div>
+        </div>
+
+        <div id="speakArea" style="display:none;">
+
+            <div class="lesson-bar">
+                <div class="lesson-bar-title">
+                    <span id="courseLabel"></span>
+                    <h2 id="lessonTitle"></h2>
+                    <p id="lessonChinese"></p>
+                </div>
+                <a id="backLesson" href="courses.html" class="app-back">← 返回本课</a>
+            </div>
+
+            <div id="filters" class="app-actions" style="margin:0 0 14px;"></div>
+
+            <div style="margin-bottom:14px;">
+                <div class="bar-label">
+                    <span id="counter"></span>
+                    <span id="practicedText"></span>
+                </div>
+                <div class="bar"><i id="bar" style="width:0%"></i></div>
+            </div>
+
+            <div class="app-card">
+
+                <span id="typeTag" class="speak-type"></span>
+
+                <div id="prompt" class="speak-prompt"></div>
+
+                <div id="note" class="speak-note"></div>
+
+                <div id="targetBox" style="display:none;"></div>
+
+                <div id="revealArea" class="app-actions" style="display:none;margin-top:14px;">
+                    <button id="revealButton" type="button" class="app-btn secondary"></button>
+                </div>
+
+                <div id="recorder" class="recorder">
+                    <span class="rec-dot"></span>
+                    <button id="recStart" type="button" class="app-btn">🎙 开始录音</button>
+                    <button id="recStop" type="button" class="app-btn warn" style="display:none;">■ 停止</button>
+                    <span id="recStatus" class="app-muted">点击开始录音，说完后停止并回听。</span>
+                    <audio id="player" controls style="display:none;"></audio>
+                </div>
+
+                <div class="app-actions" style="justify-content:space-between;">
+                    <button id="prevButton" type="button" class="app-btn secondary">← 上一项</button>
+                    <button id="nextButton" type="button" class="app-btn">下一项 →</button>
+                </div>
+
+            </div>
+
+            <div class="notice" style="margin-top:14px;">
+                录音只保存在当前页面里，关闭或切换后就会消失，不会上传。
+                发音评分、流利度和语法反馈会在后续的作业与 AI 检查功能中提供。
+                练习内容根据本课已有的教材内容生成（Guided / Free Output 来自教材原文）。
+            </div>
+
+        </div>
+
+    </div>
+
+</main>
+
+<div id="site-footer"></div>
+
+<script>
+
+const params = BoBoKa.query();
+
+const courseCode = params.get("course") || "speaking1";
+
+const hasLesson = params.has("lesson");
+
+const lessonNumber = Number(params.get("lesson") || 0);
+
+const $ = id => document.getElementById(id);
+
+const show = (id, on) => { $(id).style.display = on ? "block" : "none"; };
+
+const TYPES = {
+    read_aloud:       { label: "跟读",           reveal: null },
+    answer_question:  { label: "回答问题",       reveal: "查看参考回答（来自本课对话）" },
+    pattern_practice: { label: "句型练习",       reveal: "查看参考例句（来自本课教材）" },
+    guided_output:    { label: "Guided Output",  reveal: "查看示例" },
+    free_output:      { label: "Free Output",    reveal: null }
+};
+
+let all = [];
+let list = [];
+let filter = "all";
+let pos = 0;
+let revealed = false;
+
+const practiced = new Set();
+
+
+// ---------------------------------------------------------
+// RENDER
+// ---------------------------------------------------------
+
+function renderFilters() {
+
+    const counts = {};
+
+    all.forEach(e => { counts[e.exercise_type] = (counts[e.exercise_type] || 0) + 1; });
+
+    const buttons = [["all", "全部", all.length]];
+
+    Object.keys(TYPES).forEach(type => {
+        if (counts[type]) buttons.push([type, TYPES[type].label, counts[type]]);
+    });
+
+    $("filters").innerHTML = buttons.map(([type, label, n]) => `
+        <button type="button" data-type="${type}"
+            class="app-btn ${type === filter ? "" : "secondary"}"
+            style="min-height:34px;padding:0 14px;">
+            ${label} ${n}
+        </button>
+    `).join("");
+}
+
+
+function render() {
+
+    stopRecording(true);
+
+    const e = list[pos];
+
+    const meta = TYPES[e.exercise_type] || { label: "口语练习", reveal: null };
+
+    revealed = false;
+
+    $("counter").textContent = `第 ${pos + 1} 项 / 共 ${list.length} 项`;
+    $("bar").style.width = ((pos + 1) / list.length * 100) + "%";
+    $("practicedText").textContent = `已练习 ${practiced.size} / ${all.length}`;
+
+    $("typeTag").textContent = meta.label;
+    $("prompt").textContent = e.prompt || "";
+
+    // 说明文字
+    let note = "";
+
+    if (e.exercise_type === "read_aloud") {
+        note = e.requirement_text ? "意思：" + e.requirement_text : "";
+    }
+
+    else if (e.exercise_type === "answer_question") {
+        note = "先自己用英语回答，再查看对话里的回答。";
+    }
+
+    else if (e.exercise_type === "free_output") {
+        note = "";
+    }
+
+    $("note").textContent = note;
+
+    // 目标句子 / 要求
+    const box = $("targetBox");
+
+    box.style.display = "none";
+    box.innerHTML = "";
+
+    $("revealArea").style.display = "none";
+
+    if (e.exercise_type === "read_aloud") {
+
+        box.innerHTML = `<div class="speak-target"><small>请跟读这句话</small>${BoBoKa.esc(e.target_text)}</div>`;
+        box.style.display = "block";
+    }
+
+    else if (e.exercise_type === "free_output") {
+
+        const items = String(e.requirement_text || "")
+            .split("\n").filter(Boolean)
+            .map(t => `<li>${BoBoKa.esc(t)}</li>`).join("");
+
+        if (items) {
+            box.innerHTML = `<div class="speak-target"><small>要求</small><ul style="padding-left:18px;">${items}</ul></div>`;
+            box.style.display = "block";
+        }
+    }
+
+    else if (e.exercise_type === "guided_output" && e.requirement_text) {
+
+        box.innerHTML = `<div class="speak-target"><small>模板</small>${BoBoKa.esc(e.requirement_text)}</div>`;
+        box.style.display = "block";
+    }
+
+    if (meta.reveal && e.target_text) {
+
+        $("revealArea").style.display = "flex";
+        $("revealButton").textContent = meta.reveal;
+        $("revealButton").disabled = false;
+    }
+
+    $("prevButton").disabled = pos === 0;
+    $("nextButton").disabled = pos === list.length - 1;
+}
+
+
+$("revealButton").addEventListener("click", () => {
+
+    const e = list[pos];
+
+    const label = e.exercise_type === "answer_question" ? "参考回答"
+                : e.exercise_type === "guided_output" ? "示例"
+                : "参考例句";
+
+    const box = $("targetBox");
+
+    box.innerHTML += `<div class="speak-target"><small>${label}</small>${BoBoKa.esc(e.target_text)}</div>`;
+    box.style.display = "block";
+
+    $("revealButton").disabled = true;
+});
+
+
+$("prevButton").addEventListener("click", () => { if (pos > 0) { pos--; render(); } });
+$("nextButton").addEventListener("click", () => { if (pos < list.length - 1) { pos++; render(); } });
+
+
+$("filters").addEventListener("click", event => {
+
+    const button = event.target.closest("button[data-type]");
+
+    if (!button) return;
+
+    filter = button.dataset.type;
+
+    list = filter === "all" ? all : all.filter(e => e.exercise_type === filter);
+
+    pos = 0;
+
+    renderFilters();
+    render();
+});
+
+
+// ---------------------------------------------------------
+// RECORDING（浏览器 MediaRecorder，录音只保存在本页面内存里）
+// ---------------------------------------------------------
+
+let recorder = null;
+let stream = null;
+let chunks = [];
+let audioUrl = null;
+
+const canRecord =
+    Boolean(navigator.mediaDevices && navigator.mediaDevices.getUserMedia && window.MediaRecorder);
+
+
+function resetPlayer() {
+
+    if (audioUrl) {
+        URL.revokeObjectURL(audioUrl);
+        audioUrl = null;
+    }
+
+    $("player").removeAttribute("src");
+    $("player").style.display = "none";
+}
+
+
+function stopRecording(discard) {
+
+    if (recorder && recorder.state !== "inactive") {
+
+        recorder.onstop = null;
+
+        try { recorder.stop(); } catch (e) { /* ignore */ }
+    }
+
+    if (stream) {
+        stream.getTracks().forEach(t => t.stop());
+    }
+
+    recorder = null;
+    stream = null;
+    chunks = [];
+
+    $("recorder").classList.remove("recording");
+    $("recStart").style.display = "";
+    $("recStop").style.display = "none";
+
+    if (discard) {
+        resetPlayer();
+        $("recStart").textContent = "🎙 开始录音";
+        $("recStatus").textContent = canRecord
+            ? "点击开始录音，说完后停止并回听。"
+            : "当前浏览器不支持录音。";
+    }
+}
+
+
+$("recStart").addEventListener("click", async () => {
+
+    if (!canRecord) {
+        $("recStatus").textContent = "当前浏览器不支持录音，请换用最新版 Chrome / Edge / Safari。";
+        return;
+    }
+
+    resetPlayer();
+
+    try {
+        stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    }
+
+    catch (error) {
+        $("recStatus").textContent = "无法使用麦克风：请在浏览器地址栏允许麦克风权限。";
+        return;
+    }
+
+    chunks = [];
+
+    recorder = new MediaRecorder(stream);
+
+    recorder.ondataavailable = e => { if (e.data.size > 0) chunks.push(e.data); };
+
+    recorder.onstop = () => {
+
+        const blob = new Blob(chunks, { type: recorder.mimeType || "audio/webm" });
+
+        audioUrl = URL.createObjectURL(blob);
+
+        $("player").src = audioUrl;
+        $("player").style.display = "block";
+
+        $("recStatus").textContent = "录音完成，可以回听。不满意可以重新录音。";
+
+        $("recorder").classList.remove("recording");
+        $("recStart").style.display = "";
+        $("recStart").textContent = "🎙 重新录音";
+        $("recStop").style.display = "none";
+
+        if (stream) stream.getTracks().forEach(t => t.stop());
+
+        // 记录：这一项已经练习过（保存到服务器）
+        const e = list[pos];
+
+        practiced.add(e.id);
+
+        $("practicedText").textContent = `已练习 ${practiced.size} / ${all.length}`;
+
+        BoBoKa.post(
+            BoBoKa.lessonApi(courseCode, lessonNumber, "/speaking-practice"),
+            { exercise_id: e.id }
+        ).catch(error => {
+
+            $("recStatus").textContent =
+                "录音完成，但练习记录没有保存成功：" + error.message;
+
+        });
+    };
+
+    recorder.start();
+
+    $("recorder").classList.add("recording");
+    $("recStart").style.display = "none";
+    $("recStop").style.display = "";
+    $("recStatus").textContent = "正在录音...";
+});
+
+
+$("recStop").addEventListener("click", () => {
+
+    if (recorder && recorder.state === "recording") recorder.stop();
+});
+
+
+// ---------------------------------------------------------
+// START
+// ---------------------------------------------------------
+
+async function start() {
+
+    if (!hasLesson) {
+
+        show("loadingArea", false);
+        show("pickerArea", true);
+
+        BoBoKa.lessonPicker($("pickerArea"), "speaking.html", "选择要练习口语的一课");
+
+        return;
+    }
+
+    try {
+
+        const result = await BoBoKa.api(
+            `/api/courses/${encodeURIComponent(courseCode)}/lessons/${lessonNumber}`
+        );
+
+        const data = result.data;
+        const lesson = data.lesson;
+
+        $("courseLabel").textContent = lesson.course_title;
+        $("lessonTitle").textContent = `Lesson ${lesson.lesson_number} · ${lesson.title}`;
+        $("lessonChinese").textContent = lesson.chinese_title || "";
+
+        const lessonLink = BoBoKa.lessonUrl("lesson.html", courseCode, lessonNumber);
+
+        $("backLesson").href = lessonLink;
+        $("emptyBack").href = lessonLink;
+
+        all = data.speaking || [];
+
+        show("loadingArea", false);
+
+        if (all.length === 0) {
+
+            if (lesson.content_status === "empty") {
+                $("emptyTitle").textContent = "本课教材内容待补充";
+                $("emptyText").textContent = "教材内容录入后，才能生成本课口语练习。";
+            }
+
+            else {
+                $("emptyText").textContent = "本课还没有可用的口语练习。";
+            }
+
+            show("emptyArea", true);
+
+            return;
+        }
+
+        // 我已经练习过的项目（来自服务器）
+        (data.my_progress.speaking_practiced || [])
+            .forEach(id => practiced.add(id));
+
+        if (!canRecord) {
+            $("recStatus").textContent = "当前浏览器不支持录音。";
+            $("recStart").disabled = true;
+        }
+
+        list = all;
+
+        show("speakArea", true);
+
+        renderFilters();
+        render();
+
+    }
+
+    catch (error) {
+
+        show("loadingArea", false);
+        show("errorArea", true);
+
+        $("errorText").textContent = error.message;
+    }
+}
+
+window.addEventListener("beforeunload", () => stopRecording(true));
+
+start();
+
+</script>
+
+</body>
+</html>

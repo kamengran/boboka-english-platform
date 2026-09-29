@@ -1,0 +1,1884 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>课程学习 | BoBoKa English</title>
+
+    <link
+        rel="stylesheet"
+        href="style.css"
+    >
+    <script src="shared.js"></script>
+    <script src="homework-ui.js"></script>
+    <link rel="stylesheet" href="app.css">
+</head>
+
+
+<body>
+
+
+<!-- =========================================================
+     HEADER
+========================================================= -->
+
+<div id="site-header"></div>
+
+
+
+<!-- =========================================================
+     MAIN
+========================================================= -->
+
+<main class="lesson-page">
+
+
+    <!-- =====================================================
+         LOADING
+    ====================================================== -->
+
+    <section
+        class="lesson-loading"
+        id="loadingArea"
+    >
+
+        <div class="container">
+
+            <div class="lesson-loading-card">
+
+                <div class="lesson-loading-spinner">
+                </div>
+
+                <h2>
+                    正在加载课程...
+                </h2>
+
+                <p>
+                    正在读取 BoBoKa English 课程内容。
+                </p>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+
+    <!-- =====================================================
+         ERROR
+    ====================================================== -->
+
+    <section
+        class="lesson-error-area"
+        id="errorArea"
+        style="display: none;"
+    >
+
+        <div class="container">
+
+            <div class="lesson-error-card">
+
+                <div class="lesson-error-icon">
+                    ⚠️
+                </div>
+
+                <h2>
+                    课程加载失败
+                </h2>
+
+                <p id="errorMessage">
+                    无法读取课程。
+                </p>
+
+                <a
+                    href="courses.html"
+                    class="lesson-primary-button"
+                >
+                    返回课程
+                </a>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+
+    <!-- =====================================================
+         LESSON CONTENT
+    ====================================================== -->
+
+    <div
+        id="lessonContent"
+        style="display: none;"
+    >
+
+
+        <!-- =================================================
+             HERO
+        ================================================== -->
+
+        <section class="lesson-hero">
+
+            <div class="container">
+
+                <a
+                    id="backToCourse"
+                    href="courses.html"
+                    class="lesson-back-link"
+                >
+                    ← 返回课程目录
+                </a>
+
+
+                <div class="lesson-heading-row">
+
+                    <div>
+
+                        <span
+                            class="lesson-course-name"
+                            id="courseName"
+                        >
+                            BoBoKa English
+                        </span>
+
+                        <h1 id="lessonTitle">
+                            Lesson
+                        </h1>
+
+                        <p id="lessonChineseTitle">
+                        </p>
+
+                    </div>
+
+
+                    <div class="lesson-number-box">
+
+                        <span>
+                            Lesson
+                        </span>
+
+                        <strong id="lessonNumber">
+                            1
+                        </strong>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+
+        <!-- =================================================
+             BODY
+        ================================================== -->
+
+        <section class="lesson-content-section">
+
+            <div class="container lesson-layout">
+
+
+                <!-- =========================================
+                     SIDE NAV
+                ========================================== -->
+
+                <aside class="lesson-side-nav">
+
+                    <strong>
+                        本课内容
+                    </strong>
+
+                    <a href="#dialogueSection">
+                        💬 对话
+                    </a>
+
+                    <a href="#patternsSection">
+                        🧩 核心句型
+                    </a>
+
+                    <a href="#vocabularySection">
+                        🃏 单词
+                    </a>
+
+                    <a href="#grammarSection">
+                        📘 语法
+                    </a>
+
+                    <a href="#practiceSection">
+                        ✏️ 练习
+                    </a>
+
+                    <a href="#outputSection">
+                        🎤 口语输出
+                    </a>
+
+                    <a href="#homeworkSection">
+                        📝 作业
+                    </a>
+
+                </aside>
+
+
+
+                <!-- =========================================
+                     MAIN CONTENT
+                ========================================== -->
+
+                <div class="lesson-main-content">
+
+
+                    <!-- 教材内容待补充提示（JS 控制显示） -->
+                    <div
+                        id="contentBanner"
+                        class="lesson-pending-banner"
+                        style="display: none;"
+                    ></div>
+
+
+                    <!-- =====================================
+                         DIALOGUES
+                    ====================================== -->
+
+                    <section
+                        class="lesson-section-card"
+                        id="dialogueSection"
+                    >
+
+                        <div class="lesson-section-heading">
+
+                            <div>
+
+                                <span>
+                                    Part 1–2
+                                </span>
+
+                                <h2>
+                                    💬 对话学习
+                                </h2>
+
+                            </div>
+
+                        </div>
+
+
+                        <div id="dialogueContainer">
+                        </div>
+
+                    </section>
+
+
+
+                    <!-- =====================================
+                         PATTERNS
+                    ====================================== -->
+
+                    <section
+                        class="lesson-section-card"
+                        id="patternsSection"
+                    >
+
+                        <div class="lesson-section-heading">
+
+                            <div>
+
+                                <span>
+                                    Part 3
+                                </span>
+
+                                <h2>
+                                    🧩 核心句型
+                                </h2>
+
+                            </div>
+
+                        </div>
+
+
+                        <div
+                            class="lesson-patterns-grid"
+                            id="patternsContainer"
+                        >
+                        </div>
+
+                    </section>
+
+
+
+                    <!-- =====================================
+                         VOCABULARY
+                    ====================================== -->
+
+                    <section
+                        class="lesson-section-card"
+                        id="vocabularySection"
+                    >
+
+                        <div class="lesson-section-heading">
+
+                            <div>
+
+                                <span>
+                                    Part 4
+                                </span>
+
+                                <h2>
+                                    🃏 本课单词
+                                </h2>
+
+                            </div>
+
+
+                            <a
+                                id="flashcardsButton"
+                                href="flashcards.html"
+                                class="lesson-tool-button"
+                            >
+                                Flash Cards →
+                            </a>
+
+                        </div>
+
+
+                        <div id="vocabularyContainer">
+                        </div>
+
+                    </section>
+
+
+
+                    <!-- =====================================
+                         GRAMMAR
+                    ====================================== -->
+
+                    <section
+                        class="lesson-section-card"
+                        id="grammarSection"
+                    >
+
+                        <div class="lesson-section-heading">
+
+                            <div>
+
+                                <span>
+                                    Part 5
+                                </span>
+
+                                <h2>
+                                    📘 语法重点
+                                </h2>
+
+                            </div>
+
+                        </div>
+
+
+                        <div id="grammarContainer">
+                        </div>
+
+                    </section>
+
+
+
+                    <!-- =====================================
+                         PRACTICE
+                    ====================================== -->
+
+                    <section
+                        class="lesson-section-card"
+                        id="practiceSection"
+                    >
+
+                        <div class="lesson-section-heading">
+
+                            <div>
+
+                                <span>
+                                    Part 6
+                                </span>
+
+                                <h2>
+                                    ✏️ 替换练习
+                                </h2>
+
+                            </div>
+
+                        </div>
+
+
+                        <div
+                            class="lesson-practice-list"
+                            id="practiceContainer"
+                        >
+                        </div>
+
+
+                        <div class="lesson-action-buttons">
+
+                            <a
+                                id="practiceButton"
+                                href="practice.html"
+                                class="lesson-action-primary"
+                            >
+                                开始练习
+                            </a>
+
+                            <a
+                                id="typingButton"
+                                href="typing-practice.html"
+                                class="lesson-action-secondary"
+                            >
+                                ⌨️ 打字练习
+                            </a>
+
+                            <a
+                                id="quizButton"
+                                href="quiz.html"
+                                class="lesson-action-secondary"
+                            >
+                                🧪 本课测验
+                            </a>
+
+                        </div>
+
+                    </section>
+
+
+
+                    <!-- =====================================
+                         OUTPUT
+                    ====================================== -->
+
+                    <section
+                        class="lesson-section-card"
+                        id="outputSection"
+                    >
+
+                        <div class="lesson-section-heading">
+
+                            <div>
+
+                                <span>
+                                    Part 7–8
+                                </span>
+
+                                <h2>
+                                    🎤 口语输出
+                                </h2>
+
+                            </div>
+
+                        </div>
+
+
+                        <div id="guidedOutputContainer">
+                        </div>
+
+
+                        <div id="freeOutputContainer">
+                        </div>
+
+
+                        <a
+                            id="speakingButton"
+                            href="speaking.html"
+                            class="lesson-action-primary"
+                        >
+                            开始口语练习
+                        </a>
+
+                    </section>
+
+
+
+                    <!-- =====================================
+                         HOMEWORK
+                    ====================================== -->
+
+                    <section
+                        class="lesson-section-card"
+                        id="homeworkSection"
+                    >
+
+                        <div class="lesson-section-heading">
+
+                            <div>
+
+                                <span>
+                                    Homework
+                                </span>
+
+                                <h2>
+                                    📝 本课作业
+                                </h2>
+
+                            </div>
+
+                        </div>
+
+                        <div id="homeworkContainer">
+                        </div>
+
+                    </section>
+
+
+
+                    <!-- =====================================
+                         NAVIGATION
+                    ====================================== -->
+
+                    <div class="lesson-bottom-navigation">
+
+                        <a
+                            id="previousLessonButton"
+                            href="#"
+                            class="lesson-nav-button"
+                        >
+                            ← 上一课
+                        </a>
+
+
+                        <a
+                            id="nextLessonButton"
+                            href="#"
+                            class="lesson-nav-button next"
+                        >
+                            下一课 →
+                        </a>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+    </div>
+
+</main>
+
+
+
+<!-- =========================================================
+     FOOTER
+========================================================= -->
+
+<div id="site-footer"></div>
+
+
+
+<script>
+
+
+// API 地址由 shared.js 统一管理（BoBoKa.api）
+
+
+// =========================================================
+// URL PARAMETERS
+// =========================================================
+
+const params =
+    new URLSearchParams(
+        window.location.search
+    );
+
+
+const courseCode =
+    params.get("course") ||
+    "speaking1";
+
+
+const lessonNumber =
+    Number(
+        params.get("lesson") || 1
+    );
+
+
+// =========================================================
+// DOM
+// =========================================================
+
+const loadingArea =
+    document.getElementById(
+        "loadingArea"
+    );
+
+
+const errorArea =
+    document.getElementById(
+        "errorArea"
+    );
+
+
+const lessonContent =
+    document.getElementById(
+        "lessonContent"
+    );
+
+
+// =========================================================
+// ESCAPE HTML
+// =========================================================
+
+function escapeHTML(value) {
+
+    if (
+        value === null ||
+        value === undefined
+    ) {
+
+        return "";
+
+    }
+
+
+    return String(value)
+
+        .replace(/&/g, "&amp;")
+
+        .replace(/</g, "&lt;")
+
+        .replace(/>/g, "&gt;")
+
+        .replace(/"/g, "&quot;")
+
+        .replace(/'/g, "&#039;");
+
+}
+
+
+// =========================================================
+// LOAD LESSON
+// =========================================================
+
+async function loadLesson() {
+
+    try {
+
+        const result =
+            await BoBoKa.api(
+                `/api/courses/${encodeURIComponent(courseCode)}/lessons/${lessonNumber}`
+            );
+
+
+        renderLesson(
+            result.data
+        );
+
+
+        // 记录：我进入了这一课（保存在服务器）
+        BoBoKa.post(
+            BoBoKa.lessonApi(courseCode, lessonNumber, "/visit")
+        ).catch(() => {});
+
+
+        loadingArea.style.display =
+            "none";
+
+
+        lessonContent.style.display =
+            "block";
+
+    }
+
+    catch (error) {
+
+        console.error(error);
+
+
+        loadingArea.style.display =
+            "none";
+
+
+        errorArea.style.display =
+            "block";
+
+
+        document.getElementById(
+            "errorMessage"
+        ).textContent =
+            error.message;
+
+    }
+
+}
+
+
+// =========================================================
+// RENDER LESSON
+// =========================================================
+
+function renderLesson(data) {
+
+    const lesson =
+        data.lesson;
+
+
+    document.title =
+        `Lesson ${lesson.lesson_number} | BoBoKa English`;
+
+
+    document.getElementById(
+        "courseName"
+    ).textContent =
+        lesson.course_title;
+
+
+    document.getElementById(
+        "lessonTitle"
+    ).textContent =
+        `Lesson ${lesson.lesson_number} · ${lesson.title}`;
+
+
+    document.getElementById(
+        "lessonChineseTitle"
+    ).textContent =
+        lesson.chinese_title || "";
+
+
+    document.getElementById(
+        "lessonNumber"
+    ).textContent =
+        lesson.lesson_number;
+
+
+    document.getElementById(
+        "backToCourse"
+    ).href =
+        `course-detail.html?course=${courseCode}`;
+
+
+    renderDialogues(
+        data.dialogues || []
+    );
+
+
+    renderPatterns(
+        data.patterns || []
+    );
+
+
+    renderVocabulary(
+        data.vocabulary || []
+    );
+
+
+    renderGrammar(
+        data.grammar || []
+    );
+
+
+    renderPractice(
+        data.practice || []
+    );
+
+
+    renderGuidedOutput(
+        data.guidedOutput
+    );
+
+
+    renderFreeOutput(
+        data.freeOutput
+    );
+
+
+    const query =
+        `?course=${courseCode}&lesson=${lesson.lesson_number}`;
+
+
+    document.getElementById(
+        "flashcardsButton"
+    ).href =
+        `flashcards.html${query}`;
+
+
+    document.getElementById(
+        "practiceButton"
+    ).href =
+        `practice.html${query}`;
+
+
+    document.getElementById(
+        "typingButton"
+    ).href =
+        `typing-practice.html${query}`;
+
+
+    document.getElementById(
+        "quizButton"
+    ).href =
+        `quiz.html${query}`;
+
+
+    document.getElementById(
+        "speakingButton"
+    ).href =
+        `speaking.html${query}`;
+
+
+    renderContentStatus(
+        lesson
+    );
+
+
+    renderHomework(
+        data.homework || [],
+        lesson
+    );
+
+
+    setupNavigation(
+        lesson.lesson_number,
+        lesson.course_lesson_start,
+        lesson.course_lesson_end
+    );
+
+}
+
+
+// =========================================================
+// HOMEWORK — 本课作业（带我的状态）
+// 老师创建的作业；Demo / Test 作业有明确标记
+// =========================================================
+
+function renderHomework(list, lesson) {
+
+    const section =
+        document.getElementById("homeworkSection");
+
+    const container =
+        document.getElementById("homeworkContainer");
+
+    // 教材内容还没录入、也没有作业：不显示这一块
+    if (
+        list.length === 0 &&
+        lesson.content_status === "empty"
+    ) {
+
+        section.style.display = "none";
+
+        return;
+
+    }
+
+    section.style.display = "";
+
+    if (list.length === 0) {
+
+        container.innerHTML = `
+            <p class="lesson-empty-text">
+                这一课现在没有作业。
+            </p>`;
+
+        return;
+
+    }
+
+    const pending =
+        list.filter(
+            item =>
+                item.is_required &&
+                item.status !== "COMPLETED"
+        ).length;
+
+    container.innerHTML =
+
+        (
+            pending > 0
+                ? `<div class="lesson-pending-banner" style="display:block;">
+                       <strong>📌 Homework Pending</strong>
+                       <p>这一课还有 ${pending} 份必做作业没有完成。完成并通过老师批改后，这一课才算完成。</p>
+                   </div>`
+                : ""
+        ) +
+
+        list.map(item => `
+            <a class="hw-card" href="homework.html?id=${item.id}">
+                <div class="hw-card-main">
+                    <div class="hw-card-title">${escapeHTML(item.title)}</div>
+                    <div class="hw-card-meta">
+                        ${HW.requiredBadge(item.is_required)}
+                        ${HW.demoBadge(item.is_demo)}
+                        <span>截止：${HW.dueHTML(item, item.overdue)}</span>
+                    </div>
+                </div>
+                ${HW.statusPill(item.status)}
+            </a>`).join("");
+
+}
+
+
+// =========================================================
+// CONTENT STATUS
+// 教材原文还没有提供的部分，明确显示“教材内容待补充”，
+// 不用 AI 补写教材正文。
+// =========================================================
+
+function renderContentStatus(lesson) {
+
+    const banner =
+        document.getElementById(
+            "contentBanner"
+        );
+
+    const sections =
+        document.querySelectorAll(
+            ".lesson-main-content > .lesson-section-card:not(#homeworkSection)"
+        );
+
+
+    const sideNav =
+        document.querySelector(
+            ".lesson-side-nav"
+        );
+
+
+    banner.style.display =
+        "none";
+
+    sideNav.style.display =
+        "";
+
+
+    sections.forEach(
+        section => {
+            section.style.display = "";
+        }
+    );
+
+
+    if (
+        lesson.content_status ===
+        "empty"
+    ) {
+
+        banner.innerHTML = `
+
+            <strong>
+                📝 本课教材内容待补充
+            </strong>
+
+            <p>
+                这一课的教材内容还没有录入，
+                所以暂时没有对话、单词和练习。
+            </p>
+
+        `;
+
+        banner.style.display =
+            "block";
+
+
+        sections.forEach(
+            section => {
+                section.style.display = "none";
+            }
+        );
+
+        sideNav.style.display =
+            "none";
+
+        return;
+
+    }
+
+
+    if (
+        lesson.content_status ===
+        "partial"
+    ) {
+
+        const items =
+            (lesson.content_pending || [])
+                .map(
+                    item =>
+                        `<li>${escapeHTML(item)}</li>`
+                )
+                .join("");
+
+        banner.innerHTML = `
+
+            <strong>
+                📝 教材内容待补充
+            </strong>
+
+            <p>
+                本课已录入的内容可以正常学习，
+                下面这些教材内容还在等待补充：
+            </p>
+
+            <ul>
+                ${items}
+            </ul>
+
+        `;
+
+        banner.style.display =
+            "block";
+
+    }
+
+}
+
+
+// =========================================================
+// DIALOGUES
+// =========================================================
+
+function renderDialogues(dialogues) {
+
+    const container =
+        document.getElementById(
+            "dialogueContainer"
+        );
+
+
+    container.innerHTML = "";
+
+
+    if (
+        dialogues.length === 0
+    ) {
+
+        container.innerHTML =
+            `
+            <p class="lesson-empty-text">
+                教材内容待补充。
+            </p>
+            `;
+
+        return;
+
+    }
+
+
+    dialogues.forEach(
+        dialogue => {
+
+            const block =
+                document.createElement(
+                    "div"
+                );
+
+
+            block.className =
+                "lesson-dialogue-block";
+
+
+            let linesHTML = "";
+
+
+            (
+                dialogue.lines || []
+            ).forEach(
+                line => {
+
+                    linesHTML += `
+
+                        <div class="dialogue-line">
+
+                            <div class="speaker">
+                                ${escapeHTML(line.speaker)}
+                            </div>
+
+                            <div class="dialogue-text">
+
+                                <strong>
+                                    ${escapeHTML(line.english)}
+                                </strong>
+
+                                ${
+                                    line.chinese
+                                    ?
+                                    `
+                                    <span>
+                                        ${escapeHTML(line.chinese)}
+                                    </span>
+                                    `
+                                    :
+                                    ""
+                                }
+
+                            </div>
+
+                        </div>
+
+                    `;
+
+                }
+            );
+
+
+            block.innerHTML = `
+
+                <div class="dialogue-block-heading">
+
+                    <h3>
+                        ${escapeHTML(dialogue.dialogue_type)}
+                    </h3>
+
+                    ${
+                        dialogue.level
+                        ?
+                        `
+                        <span>
+                            ${escapeHTML(dialogue.level)}
+                        </span>
+                        `
+                        :
+                        ""
+                    }
+
+                </div>
+
+                ${linesHTML}
+
+            `;
+
+
+            container.appendChild(
+                block
+            );
+
+        }
+    );
+
+}
+
+
+// =========================================================
+// PATTERNS
+// =========================================================
+
+function renderPatterns(patterns) {
+
+    const container =
+        document.getElementById(
+            "patternsContainer"
+        );
+
+
+    container.innerHTML = "";
+
+
+    if (
+        patterns.length === 0
+    ) {
+
+        container.innerHTML =
+            `
+            <p class="lesson-empty-text">
+                教材内容待补充。
+            </p>
+            `;
+
+        return;
+
+    }
+
+
+    patterns.forEach(
+        (pattern, index) => {
+
+            let examplesHTML = "";
+
+
+            (
+                pattern.examples || []
+            ).forEach(
+                example => {
+
+                    examplesHTML += `
+
+                        <li>
+                            ${escapeHTML(example.example)}
+                        </li>
+
+                    `;
+
+                }
+            );
+
+
+            const card =
+                document.createElement(
+                    "article"
+                );
+
+
+            card.className =
+                "lesson-pattern-card";
+
+
+            card.innerHTML = `
+
+                <div class="pattern-number">
+                    ${index + 1}
+                </div>
+
+                <div>
+
+                    <h3>
+                        ${escapeHTML(pattern.pattern)}
+                    </h3>
+
+                    ${
+                        pattern.meaning
+                        ?
+                        `
+                        <p>
+                            ${escapeHTML(pattern.meaning)}
+                        </p>
+                        `
+                        :
+                        ""
+                    }
+
+                    ${
+                        examplesHTML
+                        ?
+                        `
+                        <ul>
+                            ${examplesHTML}
+                        </ul>
+                        `
+                        :
+                        ""
+                    }
+
+                </div>
+
+            `;
+
+
+            container.appendChild(
+                card
+            );
+
+        }
+    );
+
+}
+
+
+// =========================================================
+// VOCABULARY
+// =========================================================
+
+function renderVocabulary(groups) {
+
+    const container =
+        document.getElementById(
+            "vocabularyContainer"
+        );
+
+
+    container.innerHTML = "";
+
+
+    if (
+        groups.length === 0
+    ) {
+
+        container.innerHTML =
+            `
+            <p class="lesson-empty-text">
+                教材内容待补充。
+            </p>
+            `;
+
+        return;
+
+    }
+
+
+    groups.forEach(
+        group => {
+
+            const section =
+                document.createElement(
+                    "div"
+                );
+
+
+            section.className =
+                "lesson-vocab-group";
+
+
+            let wordsHTML = "";
+
+
+            (
+                group.words || []
+            ).forEach(
+                word => {
+
+                    wordsHTML += `
+
+                        <article class="lesson-vocab-card">
+
+                            <strong>
+                                ${escapeHTML(word.word)}
+                            </strong>
+
+                            ${
+                                word.ipa
+                                ?
+                                `
+                                <span>
+                                    ${escapeHTML(word.ipa)}
+                                </span>
+                                `
+                                :
+                                ""
+                            }
+
+                            <p>
+                                ${escapeHTML(word.chinese)}
+                            </p>
+
+                        </article>
+
+                    `;
+
+                }
+            );
+
+
+            section.innerHTML = `
+
+                <div class="vocab-group-heading">
+
+                    <h3>
+                        ${escapeHTML(group.category)}
+                    </h3>
+
+                    ${
+                        group.chineseCategory
+                        ?
+                        `
+                        <span>
+                            ${escapeHTML(group.chineseCategory)}
+                        </span>
+                        `
+                        :
+                        ""
+                    }
+
+                </div>
+
+                <div class="lesson-vocab-grid">
+                    ${wordsHTML}
+                </div>
+
+            `;
+
+
+            container.appendChild(
+                section
+            );
+
+        }
+    );
+
+}
+
+
+// =========================================================
+// GRAMMAR
+// =========================================================
+
+function renderGrammar(grammar) {
+
+    const container =
+        document.getElementById(
+            "grammarContainer"
+        );
+
+
+    container.innerHTML = "";
+
+
+    if (
+        grammar.length === 0
+    ) {
+
+        container.innerHTML =
+            `
+            <p class="lesson-empty-text">
+                教材内容待补充。
+            </p>
+            `;
+
+        return;
+
+    }
+
+
+    grammar.forEach(
+        (item, index) => {
+
+            let examplesHTML = "";
+
+
+            (
+                item.examples || []
+            ).forEach(
+                example => {
+
+                    examplesHTML += `
+
+                        <li>
+                            ${escapeHTML(example.example)}
+                        </li>
+
+                    `;
+
+                }
+            );
+
+
+            const block =
+                document.createElement(
+                    "div"
+                );
+
+
+            block.className =
+                "lesson-grammar-block";
+
+
+            block.innerHTML = `
+
+                <div class="grammar-number">
+                    ${index + 1}
+                </div>
+
+                <div>
+
+                    <h3>
+                        ${escapeHTML(item.title)}
+                    </h3>
+
+                    ${
+                        item.explanation
+                        ?
+                        `
+                        <p class="grammar-explanation">
+                            ${
+                                escapeHTML(
+                                    item.explanation
+                                ).replace(
+                                    /\n/g,
+                                    "<br>"
+                                )
+                            }
+                        </p>
+                        `
+                        :
+                        ""
+                    }
+
+                    ${
+                        examplesHTML
+                        ?
+                        `
+                        <ul class="grammar-example-list">
+                            ${examplesHTML}
+                        </ul>
+                        `
+                        :
+                        ""
+                    }
+
+                </div>
+
+            `;
+
+
+            container.appendChild(
+                block
+            );
+
+        }
+    );
+
+}
+
+
+// =========================================================
+// PRACTICE
+// =========================================================
+
+function renderPractice(practice) {
+
+    const container =
+        document.getElementById(
+            "practiceContainer"
+        );
+
+
+    container.innerHTML = "";
+
+
+    if (
+        practice.length === 0
+    ) {
+
+        container.innerHTML =
+            `
+            <p class="lesson-empty-text">
+                教材内容待补充。
+            </p>
+            `;
+
+        return;
+
+    }
+
+
+    practice.forEach(
+        (item, index) => {
+
+            const card =
+                document.createElement(
+                    "div"
+                );
+
+
+            card.className =
+                "lesson-practice-card";
+
+
+            let levelText =
+                item.level || "";
+
+
+            if (
+                item.level === "basic"
+            ) {
+
+                levelText =
+                    "基础";
+
+            }
+
+
+            if (
+                item.level === "advanced"
+            ) {
+
+                levelText =
+                    "进阶";
+
+            }
+
+
+            card.innerHTML = `
+
+                <div class="practice-index">
+                    ${index + 1}
+                </div>
+
+                <div>
+
+                    ${
+                        levelText
+                        ?
+                        `
+                        <span class="practice-level">
+                            ${escapeHTML(levelText)}
+                        </span>
+                        `
+                        :
+                        ""
+                    }
+
+                    <p>
+                        ${escapeHTML(item.question)}
+                    </p>
+
+                </div>
+
+            `;
+
+
+            container.appendChild(
+                card
+            );
+
+        }
+    );
+
+}
+
+
+// =========================================================
+// GUIDED OUTPUT
+// =========================================================
+
+function renderGuidedOutput(output) {
+
+    const container =
+        document.getElementById(
+            "guidedOutputContainer"
+        );
+
+
+    if (!output) {
+
+        container.innerHTML = "";
+
+        return;
+
+    }
+
+
+    container.innerHTML = `
+
+        <div class="lesson-output-block">
+
+            <h3>
+                Guided Output · 引导输出
+            </h3>
+
+            ${
+                output.instruction
+                ?
+                `
+                <p>
+                    ${escapeHTML(output.instruction)}
+                </p>
+                `
+                :
+                ""
+            }
+
+            ${
+                output.model_answer
+                ?
+                `
+                <div class="lesson-output-example">
+
+                    <strong>
+                        示例
+                    </strong>
+
+                    <p>
+                        ${escapeHTML(output.model_answer)}
+                    </p>
+
+                </div>
+                `
+                :
+                ""
+            }
+
+            ${
+                output.student_template
+                ?
+                `
+                <div class="lesson-output-template">
+
+                    <strong>
+                        模板
+                    </strong>
+
+                    <p>
+                        ${escapeHTML(output.student_template)}
+                    </p>
+
+                </div>
+                `
+                :
+                ""
+            }
+
+        </div>
+
+    `;
+
+}
+
+
+// =========================================================
+// FREE OUTPUT
+// =========================================================
+
+function renderFreeOutput(output) {
+
+    const container =
+        document.getElementById(
+            "freeOutputContainer"
+        );
+
+
+    if (!output) {
+
+        container.innerHTML = "";
+
+        return;
+
+    }
+
+
+    let requirementsHTML = "";
+
+
+    if (
+        output.requirements
+    ) {
+
+        output.requirements
+
+            .split("\n")
+
+            .filter(Boolean)
+
+            .forEach(
+                requirement => {
+
+                    requirementsHTML += `
+
+                        <li>
+                            ${escapeHTML(requirement)}
+                        </li>
+
+                    `;
+
+                }
+            );
+
+    }
+
+
+    container.innerHTML = `
+
+        <div class="lesson-output-block free-output-block">
+
+            <h3>
+                Free Output · 自由输出
+            </h3>
+
+            ${
+                output.task
+                ?
+                `
+                <p class="free-output-task">
+                    ${escapeHTML(output.task)}
+                </p>
+                `
+                :
+                ""
+            }
+
+            ${
+                requirementsHTML
+                ?
+                `
+                <ul>
+                    ${requirementsHTML}
+                </ul>
+                `
+                :
+                ""
+            }
+
+        </div>
+
+    `;
+
+}
+
+
+// =========================================================
+// PREVIOUS / NEXT
+// =========================================================
+
+function setupNavigation(
+    currentLesson,
+    firstLesson,
+    lastLesson
+) {
+
+    const previous =
+        document.getElementById(
+            "previousLessonButton"
+        );
+
+
+    const next =
+        document.getElementById(
+            "nextLessonButton"
+        );
+
+
+    if (
+        currentLesson > firstLesson
+    ) {
+
+        previous.href =
+            `lesson.html?course=${courseCode}&lesson=${currentLesson - 1}`;
+
+
+        previous.style.visibility =
+            "visible";
+
+    }
+
+    else {
+
+        previous.style.visibility =
+            "hidden";
+
+    }
+
+
+    if (
+        currentLesson < lastLesson
+    ) {
+
+        next.href =
+            `lesson.html?course=${courseCode}&lesson=${currentLesson + 1}`;
+
+
+        next.style.visibility =
+            "visible";
+
+    }
+
+    else {
+
+        next.style.visibility =
+            "hidden";
+
+    }
+
+}
+
+
+// =========================================================
+// START
+// =========================================================
+
+loadLesson();
+
+
+</script>
+
+
+</body>
+
+</html>

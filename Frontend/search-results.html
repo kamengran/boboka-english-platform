@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>搜索 | BoBoKa English</title>
+
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="app.css">
+    <script src="shared.js"></script>
+</head>
+
+<body>
+
+<div id="site-header"></div>
+
+<main class="app-page">
+
+    <section class="app-hero">
+        <div class="app-hero-inner">
+            <span class="app-eyebrow">Search</span>
+            <h1>搜索</h1>
+            <p>搜索教材、课程、Lesson、单词、语法和核心句型。</p>
+        </div>
+    </section>
+
+    <div class="app-wrap">
+
+        <form class="search-form-big" action="search-results.html" method="get">
+            <input id="q" type="search" name="q" placeholder="例如：clean、打扫、Book 1、What are you doing" autofocus>
+            <button type="submit" class="app-btn">搜索</button>
+        </form>
+
+        <div id="status" class="app-muted" style="margin-bottom:14px;"></div>
+
+        <div id="results"></div>
+
+    </div>
+
+</main>
+
+<div id="site-footer"></div>
+
+<script>
+
+const q = (BoBoKa.query().get("q") || "").trim();
+
+document.getElementById("q").value = q;
+
+
+function mark(text) {
+
+    const safe = BoBoKa.esc(text);
+
+    if (!q) return safe;
+
+    const escapedQuery = BoBoKa.esc(q).replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
+    return safe.replace(new RegExp(escapedQuery, "gi"), m => `<mark>${m}</mark>`);
+}
+
+
+function group(title, items, render) {
+
+    if (items.length === 0) return "";
+
+    return `
+        <div class="app-card result-group">
+            <h3>${title} <small>${items.length}</small></h3>
+            ${items.map(render).join("")}
+        </div>
+    `;
+}
+
+
+async function run() {
+
+    const status = document.getElementById("status");
+
+    const results = document.getElementById("results");
+
+    if (!q) {
+        status.textContent = "请输入要搜索的内容。";
+        return;
+    }
+
+    status.textContent = "正在搜索...";
+
+    try {
+
+        const data = (await BoBoKa.api("/api/search?q=" + encodeURIComponent(q))).data;
+
+        const total =
+            data.books.length + data.courses.length + data.lessons.length +
+            data.vocabulary.length + data.grammar.length + data.patterns.length;
+
+        if (total === 0) {
+            status.textContent = `没有找到与“${q}”相关的内容。`;
+            return;
+        }
+
+        status.textContent = `找到 ${total} 条与“${q}”相关的结果。`;
+
+        results.innerHTML =
+
+            group("📚 教材", data.books, b => `
+                <a class="result-item" href="reader.html?book=${b.number}">
+                    ${mark(b.title)}
+                    <small>电子教材 PDF</small>
+                </a>`) +
+
+            group("🎓 课程", data.courses, c => `
+                <a class="result-item" href="course-detail.html?course=${encodeURIComponent(c.course_code)}">
+                    ${mark(c.title)}
+                    <small>${mark(c.subtitle || "")}</small>
+                </a>`) +
+
+            group("📖 Lesson", data.lessons, l => `
+                <a class="result-item" href="${BoBoKa.lessonUrl("lesson.html", l.course_code, l.lesson_number)}">
+                    Lesson ${l.lesson_number} · ${mark(l.title)}
+                    <small>${mark(l.chinese_title || "")}</small>
+                </a>`) +
+
+            group("🃏 单词", data.vocabulary, v => `
+                <a class="result-item" href="${BoBoKa.lessonUrl("lesson.html", v.course_code, v.lesson_number)}#vocabularySection">
+                    <b>${mark(v.word)}</b> ${BoBoKa.esc(v.ipa || "")} — ${mark(v.chinese || "")}
+                    <small>Lesson ${v.lesson_number} · ${BoBoKa.esc(v.lesson_title)}</small>
+                </a>`) +
+
+            group("📘 语法", data.grammar, g => `
+                <a class="result-item" href="${BoBoKa.lessonUrl("lesson.html", g.course_code, g.lesson_number)}#grammarSection">
+                    ${mark(g.title)}
+                    <small>Lesson ${g.lesson_number} · ${BoBoKa.esc(g.lesson_title)}</small>
+                </a>`) +
+
+            group("🧩 核心句型", data.patterns, p => `
+                <a class="result-item" href="${BoBoKa.lessonUrl("lesson.html", p.course_code, p.lesson_number)}#patternsSection">
+                    ${mark(p.pattern)} — ${mark(p.meaning || "")}
+                    <small>Lesson ${p.lesson_number} · ${BoBoKa.esc(p.lesson_title)}</small>
+                </a>`);
+
+    }
+
+    catch (error) {
+        status.textContent = error.message;
+    }
+}
+
+run();
+
+</script>
+
+</body>
+</html>

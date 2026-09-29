@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>测验 | BoBoKa English</title>
+
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="app.css">
+    <script src="shared.js"></script>
+</head>
+
+<body>
+
+<div id="site-header"></div>
+
+<main class="app-page">
+
+    <section class="app-hero">
+        <div class="app-hero-inner">
+            <span class="app-eyebrow">Lesson Quiz</span>
+            <h1>本课测验</h1>
+            <p>题目根据当前 Lesson 的单词、对话和核心句型生成。选择答案后检查，并查看解析。</p>
+        </div>
+    </section>
+
+    <div class="app-wrap">
+
+        <div id="pickerArea" style="display:none;"></div>
+
+        <div id="loadingArea" class="app-card app-message">
+            <h2>正在读取测验...</h2>
+        </div>
+
+        <div id="errorArea" class="app-card app-message" style="display:none;">
+            <h2>暂时无法读取测验</h2>
+            <p id="errorText"></p>
+        </div>
+
+        <div id="emptyArea" class="app-card app-message" style="display:none;">
+            <h2 id="emptyTitle">本课暂时没有测验</h2>
+            <p id="emptyText"></p>
+            <div class="app-actions center">
+                <a id="emptyBack" href="courses.html" class="app-btn secondary">返回课程</a>
+            </div>
+        </div>
+
+
+        <!-- 答题 -->
+        <div id="quizArea" style="display:none;">
+
+            <div class="lesson-bar">
+                <div class="lesson-bar-title">
+                    <span id="courseLabel"></span>
+                    <h2 id="lessonTitle"></h2>
+                    <p id="lessonChinese"></p>
+                </div>
+                <a id="backLesson" href="courses.html" class="app-back">← 返回本课</a>
+            </div>
+
+            <div style="margin-bottom:16px;">
+                <div class="bar-label">
+                    <span id="qCounter">第 1 题 / 共 1 题</span>
+                    <span id="qPercent">0%</span>
+                </div>
+                <div class="bar"><i id="qBar" style="width:0%"></i></div>
+            </div>
+
+            <div class="app-card">
+
+                <span id="qType" class="quiz-type-tag"></span>
+
+                <h2 id="qText" class="quiz-question"></h2>
+
+                <div id="choices" class="choice-list"></div>
+
+                <div id="explain" class="quiz-explain" style="display:none;"></div>
+
+                <div class="app-actions" style="justify-content:flex-end;">
+                    <button id="checkButton" type="button" class="app-btn" disabled>检查答案</button>
+                    <button id="nextButton" type="button" class="app-btn" style="display:none;">下一题 →</button>
+                </div>
+
+            </div>
+
+            <p class="app-muted" style="margin-top:12px;">
+                本测验的题目由本课已有的教材内容自动生成，不是教材原文。
+            </p>
+
+        </div>
+
+
+        <!-- 结果 -->
+        <div id="resultArea" style="display:none;">
+
+            <div class="app-card" style="text-align:center;">
+
+                <h2 id="resultTitle">测验完成</h2>
+
+                <div id="resultScore" class="score-big">0%</div>
+
+                <p id="resultDetail" class="app-muted"></p>
+
+                <div class="app-actions center">
+                    <button id="retryButton" type="button" class="app-btn">再做一次</button>
+                    <a id="resultBack" href="courses.html" class="app-btn secondary">返回本课</a>
+                    <a href="progress.html" class="app-btn secondary">查看学习进度</a>
+                </div>
+
+            </div>
+
+            <div class="app-card">
+                <h3>答题回顾</h3>
+                <div id="reviewList"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</main>
+
+<div id="site-footer"></div>
+
+<script>
+
+const params = BoBoKa.query();
+
+const courseCode = params.get("course") || "speaking1";
+
+const hasLesson = params.has("lesson");
+
+const lessonNumber = Number(params.get("lesson") || 0);
+
+const $ = id => document.getElementById(id);
+
+const show = (id, on) => { $(id).style.display = on ? "block" : "none"; };
+
+const TYPE_LABEL = {
+    vocabulary: "单词",
+    understanding: "对话理解",
+    pattern: "核心句型",
+    grammar: "语法"
+};
+
+let questions = [];
+let index = 0;
+let selected = null;
+let checked = false;
+let answers = [];   // { question, chosen, correct }
+
+
+function optionsOf(q) {
+
+    return [
+        ["A", q.option_a],
+        ["B", q.option_b],
+        ["C", q.option_c],
+        ["D", q.option_d]
+    ].filter(pair => pair[1]);
+}
+
+
+function renderQuestion() {
+
+    const q = questions[index];
+
+    selected = null;
+    checked = false;
+
+    $("qCounter").textContent = `第 ${index + 1} 题 / 共 ${questions.length} 题`;
+
+    const percent = Math.round(index / questions.length * 100);
+
+    $("qPercent").textContent = percent + "%";
+    $("qBar").style.width = percent + "%";
+
+    $("qType").textContent = TYPE_LABEL[q.question_type] || "练习";
+    $("qText").textContent = q.question;
+
+    $("choices").innerHTML = optionsOf(q).map(([letter, text]) => `
+        <button type="button" class="choice" data-letter="${letter}">
+            <span class="letter">${letter}</span>
+            <span>${BoBoKa.esc(text)}</span>
+        </button>
+    `).join("");
+
+    $("explain").style.display = "none";
+
+    $("checkButton").style.display = "";
+    $("checkButton").disabled = true;
+    $("nextButton").style.display = "none";
+
+    $("nextButton").textContent =
+        index === questions.length - 1 ? "查看结果" : "下一题 →";
+}
+
+
+$("choices").addEventListener("click", event => {
+
+    const button = event.target.closest(".choice");
+
+    if (!button || checked) return;
+
+    selected = button.dataset.letter;
+
+    document.querySelectorAll(".choice").forEach(el =>
+        el.classList.toggle("selected", el === button)
+    );
+
+    $("checkButton").disabled = false;
+});
+
+
+// 检查答案：对错由服务器判断（答案不在浏览器里）
+$("checkButton").addEventListener("click", async () => {
+
+    if (!selected || checked) return;
+
+    checked = true;
+
+    $("checkButton").disabled = true;
+
+    const q = questions[index];
+
+    let result;
+
+    try {
+
+        result = (await BoBoKa.post("/api/quiz/check", {
+            question_id: q.id,
+            choice: selected
+        })).data;
+
+    }
+
+    catch (error) {
+
+        checked = false;
+        $("checkButton").disabled = false;
+
+        $("explain").className = "quiz-explain bad";
+        $("explain").textContent = error.message;
+        $("explain").style.display = "block";
+
+        return;
+    }
+
+    answers.push({ question: q, chosen: selected, correct: result.is_correct });
+
+    document.querySelectorAll(".choice").forEach(el => {
+
+        el.disabled = true;
+
+        if (el.dataset.letter === result.correct_answer) {
+            el.classList.add("correct");
+        }
+
+        else if (el.dataset.letter === selected) {
+            el.classList.add("wrong");
+        }
+    });
+
+    const box = $("explain");
+
+    box.className = "quiz-explain " + (result.is_correct ? "ok" : "bad");
+
+    box.innerHTML =
+        `<strong>${result.is_correct ? "✓ 回答正确" : "✗ 回答错误"}</strong><br>` +
+        BoBoKa.esc(result.explanation || "");
+
+    box.style.display = "block";
+
+    $("checkButton").style.display = "none";
+    $("nextButton").style.display = "";
+});
+
+
+$("nextButton").addEventListener("click", () => {
+
+    if (index < questions.length - 1) {
+        index++;
+        renderQuestion();
+        return;
+    }
+
+    finish();
+});
+
+
+// 完成：把所有答案交给服务器，由服务器重新判分并保存
+async function finish() {
+
+    $("nextButton").disabled = true;
+
+    let result;
+
+    try {
+
+        result = (await BoBoKa.post(
+            BoBoKa.lessonApi(courseCode, lessonNumber, "/quiz-results"),
+            {
+                answers: answers.map(a => ({
+                    question_id: a.question.id,
+                    choice: a.chosen
+                }))
+            }
+        )).data;
+
+    }
+
+    catch (error) {
+
+        $("nextButton").disabled = false;
+
+        $("explain").className = "quiz-explain bad";
+        $("explain").textContent = "成绩没有保存成功：" + error.message + " 请再点一次“查看结果”。";
+        $("explain").style.display = "block";
+
+        return;
+    }
+
+    $("nextButton").disabled = false;
+
+    show("quizArea", false);
+    show("resultArea", true);
+
+    const score = result.score;
+
+    $("resultScore").textContent = score + "%";
+
+    $("resultTitle").textContent =
+        score >= 80 ? "🎉 很棒！" : score >= 60 ? "👍 不错，继续加油" : "💪 再练习一下";
+
+    $("resultDetail").textContent =
+        `答对 ${result.correct} 题，答错 ${result.total - result.correct} 题，共 ${result.total} 题。` +
+        ` 成绩已保存到你的学习记录（最高 ${result.stats.quiz.best_score}%，共 ${result.stats.quiz.attempts} 次）。`;
+
+    const byId = Object.fromEntries(questions.map(q => [q.id, q]));
+
+    $("reviewList").innerHTML = result.answers.map((a, i) => {
+
+        const q = byId[a.question_id];
+
+        const opts = Object.fromEntries(optionsOf(q));
+
+        return `
+            <div class="review-item ${a.is_correct ? "right" : "wrong"}">
+                <strong>${a.is_correct ? "✓" : "✗"} 第 ${i + 1} 题</strong>
+                ${BoBoKa.esc(q.question)}<br>
+                你的答案：${BoBoKa.esc(opts[a.chosen] || "")}
+                ${a.is_correct ? "" : `<br>正确答案：${BoBoKa.esc(opts[a.correct_answer] || "")}`}
+                <br><span class="app-muted">${BoBoKa.esc(a.explanation || "")}</span>
+            </div>
+        `;
+    }).join("");
+
+    window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+
+$("retryButton").addEventListener("click", () => {
+
+    answers = [];
+    index = 0;
+
+    show("resultArea", false);
+    show("quizArea", true);
+
+    renderQuestion();
+});
+
+
+async function start() {
+
+    if (!hasLesson) {
+
+        show("loadingArea", false);
+        show("pickerArea", true);
+
+        BoBoKa.lessonPicker($("pickerArea"), "quiz.html", "选择要测验的一课");
+
+        return;
+    }
+
+    try {
+
+        const result = await BoBoKa.api(
+            `/api/courses/${encodeURIComponent(courseCode)}/lessons/${lessonNumber}`
+        );
+
+        const data = result.data;
+        const lesson = data.lesson;
+
+        $("courseLabel").textContent = lesson.course_title;
+        $("lessonTitle").textContent = `Lesson ${lesson.lesson_number} · ${lesson.title}`;
+        $("lessonChinese").textContent = lesson.chinese_title || "";
+
+        const lessonLink = BoBoKa.lessonUrl("lesson.html", courseCode, lessonNumber);
+
+        $("backLesson").href = lessonLink;
+        $("emptyBack").href = lessonLink;
+        $("resultBack").href = lessonLink;
+
+        questions = data.quiz || [];
+
+        show("loadingArea", false);
+
+        if (questions.length === 0) {
+
+            if (lesson.content_status === "empty") {
+                $("emptyTitle").textContent = "本课教材内容待补充";
+                $("emptyText").textContent = "教材内容录入后，才能生成本课测验。";
+            }
+
+            else {
+                $("emptyText").textContent = "本课还没有可用的测验题。";
+            }
+
+            show("emptyArea", true);
+
+            return;
+        }
+
+        show("quizArea", true);
+
+        renderQuestion();
+
+    }
+
+    catch (error) {
+
+        show("loadingArea", false);
+        show("errorArea", true);
+
+        $("errorText").textContent = error.message;
+    }
+}
+
+start();
+
+</script>
+
+</body>
+</html>

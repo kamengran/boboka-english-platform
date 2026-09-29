@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>课程 | BoBoKa English</title>
+
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="app.css">
+    <script src="shared.js"></script>
+</head>
+
+
+<body>
+
+
+<!-- =========================================================
+     HEADER
+========================================================= -->
+
+<div id="site-header"></div>
+
+
+
+<!-- =========================================================
+     COURSES PAGE
+========================================================= -->
+
+<main class="courses-page">
+
+
+    <section class="courses-hero">
+
+        <div class="container">
+
+
+            <span class="courses-label">
+                我的学习课程
+            </span>
+
+
+            <h1>
+                按照教材顺序，
+                <span>一步一步学习</span>
+            </h1>
+
+
+            <p>
+                每本课程都按照 BoBoKa English 教材顺序组织。
+                进入课程后，你可以查看 Lesson、
+                学习进度以及每一课对应的练习内容。
+            </p>
+
+
+        </div>
+
+    </section>
+
+
+
+    <!-- =====================================================
+         COURSE LIST
+    ====================================================== -->
+
+    <section class="courses-list-section">
+
+
+        <div class="container">
+
+
+            <div class="courses-section-heading">
+
+
+                <div>
+
+                    <h2>
+                        口语课程
+                    </h2>
+
+                    <p>
+                        选择课程后查看全部 Lesson 和学习进度。
+                    </p>
+
+                </div>
+
+
+            </div>
+
+
+
+            <div class="courses-grid" id="courseGrid">
+                <p class="app-muted">正在读取课程...</p>
+            </div>
+
+
+        </div>
+
+    </section>
+
+
+</main>
+
+
+
+<!-- =========================================================
+     FOOTER
+========================================================= -->
+
+<div id="site-footer"></div>
+
+
+<script>
+
+const grid = document.getElementById("courseGrid");
+
+async function loadCourses() {
+
+    try {
+
+        const courses = (await BoBoKa.api("/api/courses")).data;
+
+        const me = await BoBoKa.me();
+
+        // 我的进度（没有登录时没有）
+        let progress = [];
+
+        if (me) {
+            progress = (await BoBoKa.api("/api/progress")).data.courses;
+        }
+
+        if (!me) {
+
+            grid.insertAdjacentHTML("beforebegin", `
+                <div class="notice" style="margin-bottom:18px;">
+                    你还没有登录。<a href="login.html?next=courses.html" style="color:var(--blue);font-weight:800;">登录</a>
+                    后可以进入你已开通的课程，并保存学习进度。
+                </div>`);
+        }
+
+        if (courses.length === 0) {
+            grid.innerHTML = '<p class="app-muted">暂时没有课程。</p>';
+            return;
+        }
+
+        grid.innerHTML = courses.map((course, i) => {
+
+            const mine = progress.find(p => p.course_code === course.course_code);
+
+            const done = mine ? mine.completed : 0;
+
+            const percent = mine ? mine.percent : 0;
+
+            const started = mine && (mine.completed > 0 || mine.in_progress > 0);
+
+            const action = course.has_access
+                ? `<a href="course-detail.html?course=${encodeURIComponent(course.course_code)}" class="course-enter-button">
+                        ${started ? "继续学习 →" : "开始学习 →"}
+                   </a>`
+                : me
+                    ? '<span class="course-enter-button" style="opacity:.5;cursor:not-allowed;">🔒 未开通</span>'
+                    : '<a href="login.html?next=courses.html" class="course-enter-button">登录后进入</a>';
+
+            return `
+                <article class="course-card" ${course.has_access ? "" : 'style="opacity:.85;"'}>
+                    <div class="course-card-top">
+                        <div class="course-number">${String(i + 1).padStart(2, "0")}</div>
+                        <span class="course-type">${course.has_access ? "" : "🔒 "}${BoBoKa.esc(course.course_type === "speaking" ? "Speaking" : (course.course_type || "Course"))}</span>
+                    </div>
+
+                    <div class="course-card-content">
+                        <h2>${BoBoKa.esc(course.title)}</h2>
+                        <h3>${BoBoKa.esc(course.subtitle || "")}</h3>
+                        <p>${BoBoKa.esc(course.description || "")}</p>
+                    </div>
+
+                    <div class="course-meta">
+                        <div>
+                            <span>课程范围</span>
+                            <strong>Lesson ${course.lesson_start}–${course.lesson_end}</strong>
+                        </div>
+                        <div>
+                            <span>已录入教材</span>
+                            <strong>${course.lessons_with_content} / ${course.lesson_count} 课</strong>
+                        </div>
+                    </div>
+
+                    <div class="course-progress-area">
+                        <div class="course-progress-track">
+                            <div class="course-progress-fill" style="width: ${percent}%;"></div>
+                        </div>
+                    </div>
+
+                    <div class="course-card-footer">
+                        <span>${course.has_access ? "已完成练习 " + done + " / " + course.lesson_count : "未开通"}</span>
+                        ${action}
+                    </div>
+                </article>
+            `;
+        }).join("");
+
+    }
+
+    catch (error) {
+        grid.innerHTML = '<p class="app-muted">' + BoBoKa.esc(error.message) + '</p>';
+    }
+}
+
+loadCourses();
+
+</script>
+
+</body>
+
+</html>

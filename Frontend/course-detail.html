@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>课程详情 | BoBoKa English</title>
+
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="app.css">
+    <script src="shared.js"></script>
+</head>
+
+
+<body>
+
+
+<!-- =========================================================
+     HEADER
+========================================================= -->
+
+<div id="site-header"></div>
+
+
+
+<!-- =========================================================
+     MAIN
+========================================================= -->
+
+<main class="course-detail-page">
+
+
+    <!-- =====================================================
+         COURSE HEADER
+    ====================================================== -->
+
+    <section class="course-detail-hero">
+
+
+        <div class="container">
+
+
+            <a
+                href="courses.html"
+                class="back-to-courses"
+            >
+                ← 返回全部课程
+            </a>
+
+
+
+            <div class="course-detail-header">
+
+
+                <div>
+
+
+                    <span class="course-detail-label">
+                        BoBoKa English 口语课程
+                    </span>
+
+
+                    <h1 id="courseTitle">
+                        正在读取课程...
+                    </h1>
+
+
+                    <p id="courseSubtitle">
+                        
+                    </p>
+
+
+                    <p
+                        class="course-detail-description"
+                        id="courseDescription"
+                    >
+                        
+                    </p>
+
+
+                </div>
+
+
+
+                <div class="course-detail-progress-box">
+
+                    <span>
+                        学习进度
+                    </span>
+
+                    <strong id="courseProgressText">
+                        0%
+                    </strong>
+
+                </div>
+
+
+            </div>
+
+
+
+            <!-- Progress -->
+
+            <div class="course-detail-progress-track">
+
+                <div
+                    class="course-detail-progress-fill"
+                    id="courseProgressBar"
+                    style="width: 0%;"
+                ></div>
+
+            </div>
+
+
+
+            <div class="course-detail-meta">
+
+
+                <span id="courseRange">
+                    Lesson
+                </span>
+
+
+                <span id="courseCompleted">
+                    已完成练习 0
+                </span>
+
+
+            </div>
+
+
+        </div>
+
+
+    </section>
+
+
+
+    <!-- =====================================================
+         START / CONTINUE AREA
+    ====================================================== -->
+
+    <section class="continue-learning-section">
+
+
+        <div class="container">
+
+
+            <div class="continue-learning-card">
+
+
+                <div>
+
+
+                    <span>
+                        从第一课开始
+                    </span>
+
+
+                    <h2 id="continueLessonTitle">
+                        
+                    </h2>
+
+
+                    <p>
+                        按照教材顺序一步一步完成课程。
+                    </p>
+
+
+                </div>
+
+
+
+                <a
+                    href="lesson.html?course=speaking1&lesson=1"
+                    class="continue-learning-button"
+                    id="continueLessonButton"
+                >
+                    开始学习 →
+                </a>
+
+
+            </div>
+
+
+        </div>
+
+
+    </section>
+
+
+
+    <!-- =====================================================
+         LESSON LIST
+    ====================================================== -->
+
+    <section class="lesson-list-section">
+
+
+        <div class="container">
+
+
+            <div class="lesson-list-heading">
+
+
+                <div>
+
+                    <h2>
+                        全部课程
+                    </h2>
+
+                    <p id="lessonListDescription">
+                        按照教材顺序完成每一课。
+                    </p>
+
+                </div>
+
+
+                <div class="lesson-count-badge">
+
+                    <span id="lessonCount">
+                        Lessons
+                    </span>
+
+                </div>
+
+
+            </div>
+
+
+
+            <div
+                class="lesson-list"
+                id="lessonList"
+            >
+                <!-- JS 自动生成 -->
+            </div>
+
+
+        </div>
+
+
+    </section>
+
+
+</main>
+
+
+
+<!-- =========================================================
+     FOOTER
+========================================================= -->
+
+<div id="site-footer"></div>
+
+
+
+<!-- =========================================================
+     SCRIPT
+========================================================= -->
+
+<script>
+
+const courseCode =
+    BoBoKa.query().get("course") || "speaking1";
+
+const $ = id => document.getElementById(id);
+
+
+function showBlocked(title, message, loginLink) {
+
+    $("courseTitle").textContent = title;
+    $("courseSubtitle").textContent = "";
+    $("courseDescription").textContent = message;
+    $("courseProgressText").textContent = "";
+
+    document.querySelector(".continue-learning-section").style.display = "none";
+    document.querySelector(".lesson-list-section").style.display = "none";
+}
+
+
+async function loadCourse() {
+
+    try {
+
+        // 课程简介（所有人可见）
+        let info = null;
+
+        try {
+            info = (await BoBoKa.api("/api/courses/" + encodeURIComponent(courseCode), { noRedirect: true })).data;
+        }
+
+        catch (error) {
+
+            showBlocked("无法打开这门课程", error.message);
+
+            return;
+        }
+
+        $("courseTitle").textContent = info.title;
+        $("courseSubtitle").textContent = info.subtitle || "";
+        $("courseDescription").textContent = info.description || "";
+        document.title = info.title + " | BoBoKa English";
+
+        // Lesson 列表：需要登录 + 课程权限（服务器检查）
+        let result;
+
+        try {
+            result = await BoBoKa.api("/api/courses/" + encodeURIComponent(courseCode) + "/lessons");
+        }
+
+        catch (error) {
+
+            showBlocked(
+                info.title,
+                error.status === 403
+                    ? "🔒 你还没有开通这门课程，暂时不能查看课程内容。"
+                    : error.message
+            );
+
+            return;
+        }
+
+        const course = result.data.course;
+        const lessons = result.data.lessons;
+
+        $("courseRange").textContent =
+            "Lesson " + course.lesson_start + "–" + course.lesson_end;
+
+        $("lessonCount").textContent = lessons.length + " Lessons";
+
+        const withContent = lessons.filter(l => l.content_status !== "empty").length;
+
+        $("lessonListDescription").textContent =
+            "已录入教材内容的课：" + withContent + " / " + lessons.length +
+            "。“待补充”的课程还没有教材内容。";
+
+        // ---- 我的进度（服务器）-------------------------------------
+
+        const doneCount = lessons.filter(l => l.my_status === "completed").length;
+
+        const percent = lessons.length
+            ? Math.round(doneCount / lessons.length * 100)
+            : 0;
+
+        $("courseProgressText").textContent = percent + "%";
+        $("courseProgressBar").style.width = percent + "%";
+        $("courseCompleted").textContent =
+            "已完成练习 " + doneCount + " / " + lessons.length;
+
+        // ---- 开始 / 继续学习 ----------------------------------------
+
+        const mine = (await BoBoKa.api("/api/progress")).data.lessons
+            .filter(l => l.course_code === courseCode && l.status !== "completed");
+
+        const usable = lessons.filter(l => l.content_status !== "empty");
+
+        let target = null;
+        let label = "从第一课开始";
+
+        if (mine.length > 0) {
+
+            target = lessons.find(l => l.lesson_number === mine[0].lesson_number);
+
+            label = "继续上次学习";
+        }
+
+        if (!target || target.content_status === "empty") {
+
+            target =
+                usable.find(l => l.my_status !== "completed") ||
+                usable[0] ||
+                null;
+
+            label = "从第一课开始";
+        }
+
+        const startBox = document.querySelector(".continue-learning-card > div > span");
+
+        if (target) {
+
+            startBox.textContent = label;
+
+            $("continueLessonTitle").textContent =
+                "Lesson " + target.lesson_number + " · " + target.title;
+
+            $("continueLessonButton").href =
+                BoBoKa.lessonUrl("lesson.html", courseCode, target.lesson_number);
+
+            $("continueLessonButton").textContent =
+                label === "继续上次学习" ? "继续学习 →" : "开始学习 →";
+
+        }
+
+        else {
+
+            startBox.textContent = "教材内容待补充";
+
+            $("continueLessonTitle").textContent = "这门课还没有可学习的内容";
+
+            $("continueLessonButton").style.display = "none";
+        }
+
+        // ---- Lesson 列表 --------------------------------------------
+
+        const list = $("lessonList");
+
+        list.innerHTML = "";
+
+        lessons.forEach(lesson => {
+
+            const completed = lesson.my_status === "completed";
+
+            const inProgress = lesson.my_status === "in_progress";
+
+            const empty = lesson.content_status === "empty";
+
+            const partial = lesson.content_status === "partial";
+
+            const card = document.createElement("article");
+
+            card.className =
+                "lesson-row " + (completed ? "completed" : "not-started");
+
+            const homeworkPending = lesson.homework_pending || 0;
+
+            const statusText = completed
+                ? "已完成练习"
+                : empty
+                    ? "教材待补充"
+                    : inProgress
+                        ? "学习中 " + lesson.my_percent + "%"
+                        : partial
+                            ? "部分待补充"
+                            : "未开始";
+
+            const buttonText = completed ? "再次学习" : inProgress ? "继续学习" : "开始学习";
+
+            const action = empty
+                ? '<span class="lesson-enter-button" style="opacity:.45;cursor:not-allowed;">待补充</span>'
+                : `<a href="${BoBoKa.lessonUrl("lesson.html", courseCode, lesson.lesson_number)}"
+                       class="lesson-enter-button">${buttonText}</a>`;
+
+            card.innerHTML = `
+                <div class="lesson-status-icon">${completed ? "✓" : "○"}</div>
+
+                <div class="lesson-row-info">
+                    <span>Lesson ${lesson.lesson_number}</span>
+                    <h3>${BoBoKa.esc(lesson.title)}</h3>
+                    <p class="lesson-chinese-title">${BoBoKa.esc(lesson.chinese_title || "")}</p>
+                </div>
+
+                <span class="lesson-status-text">${statusText}${
+                    homeworkPending > 0
+                        ? ' <span style="color:#b8690d;">· 📝 作业待完成 ' + homeworkPending + "</span>"
+                        : ""
+                }</span>
+
+                ${action}
+            `;
+
+            list.appendChild(card);
+        });
+
+    }
+
+    catch (error) {
+
+        showBlocked("无法打开这门课程", error.message);
+    }
+}
+
+loadCourse();
+
+</script>
+
+
+</body>
+
+</html>

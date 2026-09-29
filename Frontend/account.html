@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>我的账户 | BoBoKa English</title>
+
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="app.css">
+    <script src="shared.js"></script>
+</head>
+
+<body>
+
+<div id="site-header"></div>
+
+<main class="app-page">
+
+    <section class="app-hero">
+        <div class="app-hero-inner">
+            <span class="app-eyebrow">My Account</span>
+            <h1>我的账户</h1>
+            <p>你的课程、每日打卡和学习数据。</p>
+        </div>
+    </section>
+
+    <div class="app-wrap">
+
+        <div id="loadingArea" class="app-card app-message"><h2>正在读取账户...</h2></div>
+
+        <div id="loggedOut" class="app-card app-message" style="display:none;">
+            <h2>你还没有登录</h2>
+            <p>登录后可以查看课程、保存学习进度和每日打卡。</p>
+            <div class="app-actions center">
+                <a class="app-btn" href="login.html?next=account.html">去登录</a>
+            </div>
+        </div>
+
+        <div id="errorArea" class="app-card app-message" style="display:none;">
+            <h2>暂时无法读取账户</h2>
+            <p id="errorText"></p>
+        </div>
+
+        <div id="content" style="display:none;">
+
+            <!-- 账户 -->
+            <div class="app-card">
+
+                <div class="acct-head">
+
+                    <div class="acct-avatar">👤</div>
+
+                    <div class="acct-info">
+                        <h2 id="nickname"></h2>
+                        <p class="app-muted" id="metaLine"></p>
+                    </div>
+
+                    <button id="logoutButton" type="button" class="app-btn secondary">退出登录</button>
+
+                </div>
+
+                <div id="devNotice" class="notice" style="display:none;margin-top:14px;">
+                    <b>Development / Test Account · 开发测试账号</b><br>
+                    这是开发测试用的临时登录，<b>不是真实的微信登录</b>。
+                    它有真实的 user_id，学习数据保存在服务器数据库里，
+                    用来测试进度、打卡和课程权限。正式版本会换成微信登录。
+                </div>
+
+            </div>
+
+            <!-- 每日打卡 -->
+            <div class="app-card">
+
+                <div class="acct-row">
+                    <h2>每日打卡</h2>
+                    <button id="checkinButton" type="button" class="app-btn">今日打卡</button>
+                </div>
+
+                <div class="stat-row" style="margin:14px 0;">
+                    <div class="stat-box"><strong id="ckToday">—</strong><span>今日</span></div>
+                    <div class="stat-box"><strong id="ckStreak">0</strong><span>连续学习（天）</span></div>
+                    <div class="stat-box"><strong id="ckLongest">0</strong><span>最长连续（天）</span></div>
+                    <div class="stat-box"><strong id="ckTotal">0</strong><span>累计打卡（天）</span></div>
+                </div>
+
+                <h3 style="margin-bottom:8px;">打卡历史</h3>
+
+                <div id="ckHistory" class="ck-history"></div>
+
+                <p class="app-muted" style="margin-top:10px;">
+                    每天只能打卡一次；日期按 <span id="tzText"></span> 计算。
+                </p>
+
+            </div>
+
+            <!-- 课程 -->
+            <div class="app-card">
+
+                <h2>我的课程</h2>
+
+                <p class="app-muted" style="margin:4px 0 12px;">
+                    你只能进入已经开通的课程。没有开通的课程显示 🔒，服务器也不会给你这些课程的内容。
+                </p>
+
+                <div id="courseList"></div>
+
+            </div>
+
+            <!-- 数据 -->
+            <div class="app-card">
+
+                <h2>我的学习数据</h2>
+
+                <div class="stat-row" style="margin-top:14px;">
+                    <div class="stat-box"><strong id="tDone">0</strong><span>完成的课</span></div>
+                    <div class="stat-box"><strong id="tTyping">0</strong><span>打字完成次数</span></div>
+                    <div class="stat-box"><strong id="tQuiz">0</strong><span>测验次数</span></div>
+                    <div class="stat-box"><strong id="tSpeak">0</strong><span>口语练习项</span></div>
+                </div>
+
+                <div class="app-actions">
+                    <a href="progress.html" class="app-btn secondary">查看详细学习进度</a>
+                </div>
+
+            </div>
+
+            <!-- 开发测试工具 -->
+            <div id="devTools" class="app-card dev-tools" style="display:none;">
+
+                <h2>开发测试工具</h2>
+
+                <p class="app-muted" style="margin:4px 0 12px;">
+                    只有开发测试账号能看到这些按钮，用来快速测试连续打卡和重新开始。
+                </p>
+
+                <div class="app-actions" style="margin-top:0;">
+                    <button type="button" class="app-btn secondary dev-checkin" data-back="1">补打卡：昨天</button>
+                    <button type="button" class="app-btn secondary dev-checkin" data-back="2">补打卡：前天</button>
+                    <button type="button" class="app-btn secondary dev-checkin" data-back="5">补打卡：5 天前</button>
+                    <button id="resetButton" type="button" class="app-btn warn">清空我的学习数据</button>
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</main>
+
+<div id="site-footer"></div>
+
+<style>
+    .acct-head { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+    .acct-avatar { width: 56px; height: 56px; display: flex; align-items: center; justify-content: center;
+        border-radius: 50%; background: var(--blue-light); font-size: 26px; }
+    .acct-info { flex: 1; min-width: 160px; }
+    .acct-info h2 { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    .acct-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+    .ck-history { display: flex; flex-wrap: wrap; gap: 6px; }
+    .ck-day { padding: 4px 10px; border-radius: 999px; background: #e9f8f1; color: #0d8a58; font-size: 12px; font-weight: 700; }
+    .course-row { display: flex; align-items: center; gap: 12px; padding: 12px 0; border-top: 1px solid #edf1f6; }
+    .course-row:first-child { border-top: none; }
+    .course-row .course-name { flex: 1; min-width: 0; }
+    .course-row .course-name strong { display: block; }
+    .course-row.locked { color: #9aa7b6; }
+    .dev-tools { border: 2px dashed #f0b463; background: #fffaf0; }
+</style>
+
+<script>
+
+const $ = id => document.getElementById(id);
+
+const ROLE_LABEL = { student: "学生", teacher: "老师 / 助教", admin: "管理员" };
+
+let isDev = false;
+
+
+function renderCheckin(c) {
+
+    $("ckToday").textContent = c.checked_in_today ? "✓ 已打卡" : "未打卡";
+    $("ckStreak").textContent = c.current_streak;
+    $("ckLongest").textContent = c.longest_streak;
+    $("ckTotal").textContent = c.total_checkins;
+    $("tzText").textContent = c.timezone;
+
+    $("checkinButton").disabled = c.checked_in_today;
+    $("checkinButton").textContent = c.checked_in_today ? "✓ 今日已打卡" : "🔥 今日打卡";
+
+    $("ckHistory").innerHTML = c.history.length
+        ? c.history.slice(0, 30).map(d => `<span class="ck-day">${BoBoKa.esc(d)}</span>`).join("")
+        : '<span class="app-muted">还没有打卡记录。</span>';
+
+    window.__today = c.today;
+}
+
+
+function dateBack(days) {
+
+    const d = new Date(window.__today + "T00:00:00Z");
+
+    d.setUTCDate(d.getUTCDate() - days);
+
+    return d.toISOString().slice(0, 10);
+}
+
+
+async function load() {
+
+    try {
+
+        const data = await BoBoKa.me(true);
+
+        if (!data) {
+            $("loadingArea").style.display = "none";
+            $("loggedOut").style.display = "block";
+            return;
+        }
+
+        const [catalog, progress] = await Promise.all([
+            BoBoKa.api("/api/courses"),
+            BoBoKa.api("/api/progress")
+        ]);
+
+        isDev = data.user.is_dev;
+
+        $("nickname").innerHTML =
+            BoBoKa.esc(data.user.nickname) +
+            (isDev ? ' <span class="dev-pill">TEST</span>' : "");
+
+        $("metaLine").textContent =
+            `user_id ${data.user.id} · ${ROLE_LABEL[data.user.role] || data.user.role} · ` +
+            (isDev ? "登录方式：开发测试账号（Development / Test）" : "登录方式：微信");
+
+        $("devNotice").style.display = isDev ? "block" : "none";
+        $("devTools").style.display = isDev ? "block" : "none";
+
+        renderCheckin(data.checkin);
+
+        // 课程：全部课程，有权限的可以进入，没有权限的显示锁
+        const owned = new Set(data.courses.map(c => c.course_code));
+
+        $("courseList").innerHTML = catalog.data.map(course => {
+
+            const has = course.has_access;
+
+            const mine = progress.data.courses.find(c => c.course_code === course.course_code);
+
+            return has ? `
+                <div class="course-row">
+                    <div class="course-name">
+                        <strong>${BoBoKa.esc(course.title)}</strong>
+                        <span class="app-muted">已完成 ${mine ? mine.completed : 0} / ${course.lesson_count} 课
+                        · 已录入教材 ${course.lessons_with_content} 课</span>
+                    </div>
+                    <a class="app-btn" href="course-detail.html?course=${encodeURIComponent(course.course_code)}">进入课程</a>
+                </div>
+            ` : `
+                <div class="course-row locked">
+                    <div class="course-name">
+                        <strong>🔒 ${BoBoKa.esc(course.title)}</strong>
+                        <span>你还没有开通这门课程</span>
+                    </div>
+                    <span class="tag todo">未开通</span>
+                </div>
+            `;
+        }).join("") || '<p class="app-muted">暂时没有课程。</p>';
+
+        if (owned.size === 0) {
+            $("courseList").insertAdjacentHTML("afterbegin",
+                '<div class="notice" style="margin-bottom:10px;">这个账号还没有开通任何课程。如果你已经购买，请联系 BoBoKa English 老师。</div>');
+        }
+
+        const t = progress.data.totals;
+
+        $("tDone").textContent = t.lessons_completed;
+        $("tTyping").textContent = t.typing_completed;
+        $("tQuiz").textContent = t.quiz_attempts;
+        $("tSpeak").textContent = t.speaking_practiced;
+
+        $("loadingArea").style.display = "none";
+        $("content").style.display = "block";
+
+    }
+
+    catch (error) {
+
+        $("loadingArea").style.display = "none";
+        $("errorArea").style.display = "block";
+        $("errorText").textContent = error.message;
+    }
+}
+
+
+$("checkinButton").addEventListener("click", async () => {
+
+    $("checkinButton").disabled = true;
+
+    try {
+
+        const result = await BoBoKa.post("/api/checkin");
+
+        renderCheckin(result.data);
+
+    }
+
+    catch (error) {
+        alert(error.message);
+    }
+});
+
+
+$("logoutButton").addEventListener("click", async () => {
+
+    await BoBoKa.post("/api/auth/logout", {}, { noRedirect: true });
+
+    location.href = "login.html";
+});
+
+
+document.querySelectorAll(".dev-checkin").forEach(button => {
+
+    button.addEventListener("click", async () => {
+
+        try {
+
+            const result = await BoBoKa.post("/api/dev/checkin", {
+                date: dateBack(Number(button.dataset.back))
+            });
+
+            renderCheckin(result.data);
+
+        }
+
+        catch (error) {
+            alert(error.message);
+        }
+    });
+});
+
+
+$("resetButton").addEventListener("click", async () => {
+
+    if (!confirm("清空这个测试账号的全部学习数据（进度、结果、打卡）？")) return;
+
+    try {
+
+        await BoBoKa.post("/api/dev/reset");
+
+        load();
+
+    }
+
+    catch (error) {
+        alert(error.message);
+    }
+});
+
+load();
+
+</script>
+
+</body>
+</html>

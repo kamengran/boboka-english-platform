@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>登录 | BoBoKa English</title>
+
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="app.css">
+    <script src="shared.js"></script>
+</head>
+
+
+<body>
+
+
+<!-- =========================================================
+     HEADER
+========================================================= -->
+
+<div id="site-header"></div>
+
+
+
+<!-- =========================================================
+     LOGIN
+========================================================= -->
+
+<main class="login-page">
+
+
+    <div class="login-wrapper">
+
+
+        <!-- =================================================
+             LEFT
+        ================================================== -->
+
+        <section class="login-intro">
+
+
+            <div class="login-intro-content">
+
+
+                <span class="login-label">
+                    BoBoKa English
+                </span>
+
+
+                <h1>
+                    欢迎回来
+                </h1>
+
+
+                <p>
+                    登录后继续你的英语学习，
+                    系统会自动保存课程、练习、测验、
+                    口语训练和学习进度。
+                </p>
+
+
+
+                <div class="login-benefits">
+
+
+                    <div class="login-benefit">
+
+                        <div class="benefit-icon">
+                            📚
+                        </div>
+
+                        <div>
+
+                            <strong>
+                                查看已购买课程
+                            </strong>
+
+                            <span>
+                                登录后查看你已经开通的教材与课程。
+                            </span>
+
+                        </div>
+
+                    </div>
+
+
+
+                    <div class="login-benefit">
+
+                        <div class="benefit-icon">
+                            ▶
+                        </div>
+
+                        <div>
+
+                            <strong>
+                                继续上次学习
+                            </strong>
+
+                            <span>
+                                自动找到你上一次学习的课程位置。
+                            </span>
+
+                        </div>
+
+                    </div>
+
+
+
+                    <div class="login-benefit">
+
+                        <div class="benefit-icon">
+                            📈
+                        </div>
+
+                        <div>
+
+                            <strong>
+                                保存学习进度
+                            </strong>
+
+                            <span>
+                                记录课程、练习、测验与口语学习情况。
+                            </span>
+
+                        </div>
+
+                    </div>
+
+
+
+                    <div class="login-benefit">
+
+                        <div class="benefit-icon">
+                            🔥
+                        </div>
+
+                        <div>
+
+                            <strong>
+                                每日打卡，连续学习
+                            </strong>
+
+                            <span>
+                                每天打卡一次，记录你的连续学习天数。
+                            </span>
+
+                        </div>
+
+                    </div>
+
+
+                </div>
+
+
+            </div>
+
+
+        </section>
+
+
+
+        <!-- =================================================
+             RIGHT LOGIN CARD
+        ================================================== -->
+
+        <section class="login-card">
+
+            <div class="login-card-inner">
+
+                <div class="login-logo">B</div>
+
+                <h2>登录 BoBoKa English</h2>
+
+                <p class="login-description">
+                    正式版本使用微信登录，无需另外注册账号或记住密码。
+                </p>
+
+                <!-- WeChat：还没有接入，不冒充完成 -->
+                <button
+                    class="wechat-login-button"
+                    id="wechatLoginButton"
+                    type="button"
+                >
+                    <span class="wechat-icon">💬</span>
+                    <span>微信登录（尚未接入）</span>
+                </button>
+
+                <div class="login-status show" id="loginStatus">
+                    微信登录还没有接入，现在无法使用。
+                    请先用下面的开发测试账号进入网站。
+                </div>
+
+                <!-- Development / Test login -->
+                <div class="dev-login-box" id="devBox" style="display:none;">
+
+                    <h3>Development / Test Account · 开发测试登录</h3>
+
+                    <p>
+                        仅用于开发测试，不是真实的学生账号。
+                        每个测试账号都有自己真实的 user_id，
+                        学习进度、打卡和课程权限都保存在服务器数据库里。
+                    </p>
+
+                    <div id="devAccounts"></div>
+
+                </div>
+
+                <div class="login-status show" id="loginError" style="display:none;color:#c0392b;"></div>
+
+                <p class="login-agreement">
+                    登录即表示你同意
+                    <a href="#">《服务条款》</a>
+                    和
+                    <a href="#">《隐私政策》</a>
+                </p>
+
+            </div>
+
+        </section>
+
+
+    </div>
+
+
+</main>
+
+
+
+<!-- =========================================================
+     FOOTER
+========================================================= -->
+
+<div id="site-footer"></div>
+
+
+
+<script>
+
+
+    // 登录后回到原来的页面。只允许本站的相对地址，防止跳到别的网站。
+    function safeNext() {
+
+        const next = new URLSearchParams(location.search).get("next") || "";
+
+        if (
+            /^[A-Za-z0-9_-]+\.html(\?[A-Za-z0-9_=&%.-]*)?$/.test(next)
+        ) {
+            return next;
+        }
+
+        return "account.html";
+    }
+
+    document.getElementById("wechatLoginButton").addEventListener(
+        "click",
+        function () {
+
+            const status = document.getElementById("loginStatus");
+
+            status.textContent =
+                "微信登录还没有接入，暂时不能使用。" +
+                "接入以后，这里会显示真实的微信二维码。";
+
+        }
+    );
+
+    async function start() {
+
+        // 已经登录：直接进入
+        const current = await BoBoKa.me();
+
+        if (current) {
+            location.replace(safeNext());
+            return;
+        }
+
+        let options;
+
+        try {
+            options = (await BoBoKa.api("/api/auth/options", { noRedirect: true })).data;
+        }
+
+        catch (error) {
+
+            const box = document.getElementById("loginError");
+
+            box.textContent = error.message;
+            box.style.display = "block";
+
+            return;
+        }
+
+        if (!options.dev_login_enabled) {
+            return;
+        }
+
+        const accounts =
+            (await BoBoKa.api("/api/auth/dev-accounts", { noRedirect: true })).data;
+
+        document.getElementById("devBox").style.display = "block";
+
+        document.getElementById("devAccounts").innerHTML = accounts.map(account => `
+            <button type="button" class="dev-login-account" data-key="${BoBoKa.esc(account.key)}">
+                <div>
+                    <strong>${BoBoKa.esc(account.nickname)}</strong>
+                    <span>${BoBoKa.esc(account.description)}</span>
+                </div>
+                <em>测试登录 →</em>
+            </button>
+        `).join("");
+    }
+
+    document.getElementById("devAccounts").addEventListener("click", async event => {
+
+        const button = event.target.closest("button[data-key]");
+
+        if (!button) return;
+
+        button.disabled = true;
+
+        try {
+
+            await BoBoKa.post(
+                "/api/auth/dev-login",
+                { key: button.dataset.key },
+                { noRedirect: true }
+            );
+
+            location.href = safeNext();
+
+        }
+
+        catch (error) {
+
+            const box = document.getElementById("loginError");
+
+            box.textContent = error.message;
+            box.style.display = "block";
+
+            button.disabled = false;
+        }
+    });
+
+    start();
+
+</script>
+
+</body>
+
+</html>

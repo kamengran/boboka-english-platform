@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>BoBoKa English | 一步一步学英语</title>
+
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="app.css">
+    <script src="shared.js"></script>
+</head>
+
+<body>
+
+    <!-- =========================
+         HEADER
+    ========================== -->
+
+    <div id="site-header"></div>
+
+
+
+    <!-- =========================
+         MAIN
+    ========================== -->
+
+    <main>
+
+
+        <!-- =========================
+             HERO
+        ========================== -->
+
+        <section class="hero-section">
+
+            <div class="container hero-grid">
+
+
+                <!--
+                    左侧整个区域使用
+                    assets/hero-students.png
+                    作为背景图片
+                -->
+
+                <div class="hero-main">
+
+                    <div class="hero-content">
+
+                        <h1>
+                            一步一步，
+                            <span>学好英语</span>
+                        </h1>
+
+
+                        <p>
+                            BoBoKa English 拥有完整的 12 本教材体系，
+                            配套视频课程、练习题、测验系统与口语训练内容，
+                            帮助你按照清晰的学习路线，一步一步完成学习。
+                        </p>
+
+
+                        <div class="hero-buttons">
+
+                            <a
+                                href="books.html"
+                                class="primary-button"
+                            >
+                                ▶ 开始学习
+                            </a>
+
+                            <a
+                                href="courses.html"
+                                class="secondary-button"
+                            >
+                                📘 查看课程
+                            </a>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+
+                <!-- =========================
+                     SIGN IN
+                ========================== -->
+
+                <aside class="checkin-card">
+
+                    <h2>每日打卡 🔥</h2>
+
+                    <div class="checkin-message" id="checkinMessage">
+                        <div class="checkin-icon">🔒</div>
+                        <div>
+                            <strong>登录后可以打卡</strong>
+                            <p>每日打卡和连续学习天数会保存在你的账户里。</p>
+                        </div>
+                    </div>
+
+                    <button
+                        class="checkin-button"
+                        id="checkinButton"
+                        type="button"
+                        disabled
+                    >
+                        🔒 登录后可打卡
+                    </button>
+
+                    <div class="streak">
+
+                        <div class="streak-title">
+                            <strong>连续学习</strong>
+                            <span id="streakDays">—</span>
+                        </div>
+
+                        <p class="streak-reward" id="checkinTotals">
+                            累计打卡 — 天
+                        </p>
+
+                        <div class="streak-row" id="checkinRow"></div>
+
+                    </div>
+
+                </aside>
+
+            </div>
+
+        </section>
+
+
+
+        <!-- =========================
+             DASHBOARD
+        ========================== -->
+
+        <section class="dashboard-section" style="padding-bottom:0;">
+            <div class="container">
+                <div id="welcome" class="welcome-bar" style="display:none;"></div>
+            </div>
+        </section>
+
+        <section class="dashboard-section">
+
+            <div class="container dashboard-grid">
+
+                <!-- PROGRESS -->
+                <section class="dashboard-card">
+
+                    <div class="card-heading">
+                        <h2>📊 我的学习进度</h2>
+                        <a href="progress.html">查看全部进度</a>
+                    </div>
+
+                    <div class="overall-progress">
+
+                        <div class="progress-title">
+                            <span id="overallLabel">总体进度</span>
+                            <strong id="overallPercent">0%</strong>
+                        </div>
+
+                        <div class="progress-track">
+                            <div class="progress-fill" id="overallBar" style="width: 0%;"></div>
+                        </div>
+
+                    </div>
+
+                    <div class="stats-grid">
+
+                        <div class="stat-card">
+                            <div class="stat-icon">📘</div>
+                            <span>学习过的课</span>
+                            <strong id="statVisited">0</strong>
+                        </div>
+
+                        <div class="stat-card">
+                            <div class="stat-icon">✅</div>
+                            <span>完成练习的课</span>
+                            <strong id="statDone">0</strong>
+                        </div>
+
+                        <div class="stat-card">
+                            <div class="stat-icon">🧪</div>
+                            <span>测验次数</span>
+                            <strong id="statQuiz">0</strong>
+                        </div>
+
+                        <div class="stat-card">
+                            <div class="stat-icon">⌨️</div>
+                            <span>打字完成次数</span>
+                            <strong id="statTyping">0</strong>
+                        </div>
+
+                    </div>
+
+                    <div class="encouragement">
+                        这里显示这台设备上的真实学习记录。账户上线后会同步到你的账户。
+                    </div>
+
+                </section>
+
+                <!-- HOMEWORK -->
+                <section class="dashboard-card" id="homeworkCard" style="display:none;">
+
+                    <div class="card-heading">
+                        <h2>📝 我的作业</h2>
+                        <a href="homework.html">全部作业</a>
+                    </div>
+
+                    <div class="recent-list" id="homeworkList"></div>
+
+                </section>
+
+                <!-- RECENT LEARNING -->
+                <section class="dashboard-card">
+
+                    <div class="card-heading">
+                        <h2>🕘 最近学习</h2>
+                        <a href="courses.html">全部课程</a>
+                    </div>
+
+                    <div class="recent-list" id="recentList">
+                        <p class="app-muted">正在读取...</p>
+                    </div>
+
+                </section>
+
+            </div>
+
+        </section>
+
+
+    </main>
+
+
+
+    <!-- =========================
+         FOOTER
+    ========================== -->
+
+    <div id="site-footer"></div>
+
+
+
+    <!-- 首页数据：读取这台设备上的真实学习记录 -->
+
+    <script>
+
+        const $ = id => document.getElementById(id);
+
+
+        function lastDays(checkin, count) {
+
+            // 最近 count 天（含今天）：哪几天打了卡
+            const done = new Set(checkin.history);
+
+            const days = [];
+
+            for (let n = count - 1; n >= 0; n--) {
+
+                const d = new Date(checkin.today + "T00:00:00Z");
+
+                d.setUTCDate(d.getUTCDate() - n);
+
+                const date = d.toISOString().slice(0, 10);
+
+                days.push({ date, done: done.has(date), today: n === 0 });
+            }
+
+            return days;
+        }
+
+
+        function renderCheckin(c) {
+
+            $("streakDays").textContent = c.current_streak + " 天";
+
+            $("checkinTotals").textContent =
+                "累计打卡 " + c.total_checkins + " 天 · 最长连续 " + c.longest_streak + " 天";
+
+            $("checkinRow").innerHTML = lastDays(c, 5).map((day, index, all) => `
+                <div class="streak-day ${day.done ? "active" : ""}">
+                    <b>${day.done ? "🔥" : "○"}</b>
+                    <span>${day.today ? "今天" : day.date.slice(5)}</span>
+                </div>
+                ${index < all.length - 1 ? '<div class="streak-line"></div>' : ""}
+            `).join("");
+
+            const button = $("checkinButton");
+
+            const box = $("checkinMessage");
+
+            if (c.checked_in_today) {
+
+                button.disabled = true;
+                button.classList.remove("available");
+                button.classList.add("completed");
+                button.textContent = "✓ 今日已打卡";
+
+                box.innerHTML = `
+                    <div class="checkin-icon">✅</div>
+                    <div><strong>今天已经打卡</strong><p>明天继续，保持连续学习。</p></div>`;
+
+            }
+
+            else {
+
+                button.disabled = false;
+                button.classList.remove("completed");
+                button.classList.add("available");
+                button.textContent = "🔥 今日打卡";
+
+                box.innerHTML = `
+                    <div class="checkin-icon">📅</div>
+                    <div><strong>今天还没有打卡</strong><p>每天可以打卡一次。</p></div>`;
+            }
+        }
+
+
+        $("checkinButton").addEventListener("click", async () => {
+
+            $("checkinButton").disabled = true;
+
+            try {
+                renderCheckin((await BoBoKa.post("/api/checkin")).data);
+            }
+
+            catch (error) {
+                alert(error.message);
+            }
+        });
+
+
+        function lessonCard(item, primary) {
+
+            const steps = [
+                item.typing.count > 0,
+                item.quiz.attempts > 0,
+                item.flashcards.known + item.flashcards.practice > 0,
+                item.speaking.practiced > 0
+            ].filter(Boolean).length;
+
+            return `
+                <article class="recent-item">
+
+                    <div class="lesson-placeholder">${item.status === "completed" ? "✅" : "📘"}</div>
+
+                    <div class="lesson-info">
+                        <span>${BoBoKa.esc(item.course_title)} · Lesson ${item.lesson_number}</span>
+                        <h3>${BoBoKa.esc(item.title)}</h3>
+                        <p>${item.status === "completed" ? "已完成练习" : "已使用 " + steps + " / 4 种练习"}</p>
+                        <div class="mini-track">
+                            <div class="mini-fill" style="width: ${item.progress_percent}%;"></div>
+                        </div>
+                    </div>
+
+                    <a href="${BoBoKa.lessonUrl("lesson.html", item.course_code, item.lesson_number)}" class="continue-button">
+                        ${primary ? "继续学习" : "再看看"}
+                    </a>
+
+                </article>`;
+        }
+
+
+        function renderHomework(hw) {
+
+            const card = $("homeworkCard");
+
+            const revise = hw.needs_revision;
+
+            const todo = hw.pending.slice(0, 4);
+
+            if (revise.length === 0 && todo.length === 0 && hw.awaiting_review === 0) {
+
+                card.style.display = "none";
+
+                return;
+            }
+
+            card.style.display = "block";
+
+            const row = (item, label, cls) => `
+                <article class="recent-item">
+                    <div class="lesson-placeholder">📝</div>
+                    <div class="lesson-info">
+                        <span>${BoBoKa.esc(item.course_title)} · Lesson ${item.lesson_number}</span>
+                        <h3>${BoBoKa.esc(item.title)}</h3>
+                        <p>${label}${item.is_required ? " · 必做" : " · 选做"}${item.is_demo ? " · Demo / Test" : ""}</p>
+                    </div>
+                    <a href="homework.html?id=${item.id}" class="continue-button">${cls}</a>
+                </article>`;
+
+            $("homeworkList").innerHTML =
+                revise.map(item => row(item, "老师要求修改", "去修改")).join("") +
+                todo.map(item => row(item, item.overdue ? "已逾期，还没提交" : "还没有提交", "去完成")).join("") +
+                (
+                    hw.awaiting_review > 0
+                        ? `<p class="app-muted" style="padding:6px 4px;">另有 ${hw.awaiting_review} 份作业已提交，等待老师批改。</p>`
+                        : ""
+                );
+        }
+
+
+        function showLoggedOut() {
+
+            $("overallLabel").textContent = "总体进度";
+            $("overallPercent").textContent = "—";
+
+            for (const id of ["statVisited", "statDone", "statQuiz", "statTyping"]) {
+                $(id).textContent = "—";
+            }
+
+            $("recentList").innerHTML = `
+                <div class="app-message">
+                    <p>登录后可以看到你的课程、学习进度和最近学习。</p>
+                    <div class="app-actions center">
+                        <a class="app-btn" href="login.html">去登录</a>
+                    </div>
+                </div>`;
+        }
+
+
+        async function loadDashboard() {
+
+            try {
+
+                const me = await BoBoKa.me();
+
+                if (!me) {
+
+                    showLoggedOut();
+
+                    return;
+                }
+
+                const d = (await BoBoKa.api("/api/dashboard")).data;
+
+                // 欢迎
+                $("welcome").style.display = "block";
+
+                $("welcome").innerHTML =
+                    "👋 欢迎回来，<b>" + BoBoKa.esc(d.user.nickname) + "</b>" +
+                    (d.user.is_dev ? ' <span class="dev-pill">TEST</span>' : "") +
+                    " · 你有 " + d.courses.length + " 门课程";
+
+                renderCheckin(d.checkin);
+
+                // 总体进度
+                const totalLessons = d.courses.reduce((n, c) => n + c.lesson_count, 0);
+
+                const doneLessons = d.courses.reduce((n, c) => n + c.completed, 0);
+
+                const percent = totalLessons ? Math.round(doneLessons / totalLessons * 100) : 0;
+
+                $("overallPercent").textContent = percent + "%";
+                $("overallBar").style.width = percent + "%";
+                $("overallLabel").textContent =
+                    "总体进度（已完成练习 " + doneLessons + " / " + totalLessons + " 课）";
+
+                $("statVisited").textContent = d.totals.lessons_started;
+                $("statDone").textContent = d.totals.lessons_completed;
+                $("statQuiz").textContent = d.totals.quiz_attempts;
+                $("statTyping").textContent = d.totals.typing_completed;
+
+                // 作业：待修改 / 待完成
+                renderHomework(d.homework);
+
+                // 继续学习 + 最近学习
+                if (d.courses.length === 0) {
+
+                    $("recentList").innerHTML = `
+                        <div class="app-message">
+                            <p>这个账号还没有开通课程。如果你已经购买，请联系 BoBoKa English 老师。</p>
+                        </div>`;
+
+                    return;
+                }
+
+                let html = "";
+
+                if (d.continue) {
+
+                    const c = d.continue;
+
+                    html += `
+                        <article class="recent-item" style="border-color:var(--blue);">
+                            <div class="lesson-placeholder">▶</div>
+                            <div class="lesson-info">
+                                <span>继续学习 · ${BoBoKa.esc(c.course_title)}</span>
+                                <h3>Lesson ${c.lesson_number} · ${BoBoKa.esc(c.title)}</h3>
+                                <p>${c.status === "not_started" ? "还没有开始" : "已完成 " + c.progress_percent + "%"}</p>
+                            </div>
+                            <a href="${BoBoKa.lessonUrl("lesson.html", c.course_code, c.lesson_number)}" class="continue-button">继续学习</a>
+                        </article>`;
+                }
+
+                const others = d.recent.filter(r =>
+                    !d.continue ||
+                    r.course_code !== d.continue.course_code ||
+                    r.lesson_number !== d.continue.lesson_number
+                );
+
+                html += others.map(item => lessonCard(item, item.status !== "completed")).join("");
+
+                $("recentList").innerHTML = html ||
+                    '<p class="app-muted">还没有学习记录。</p>';
+
+            }
+
+            catch (error) {
+
+                $("recentList").innerHTML =
+                    '<p class="app-muted">' + BoBoKa.esc(error.message) + '</p>';
+            }
+        }
+
+        loadDashboard();
+
+    </script>
+
+</body>
+
+</html>
